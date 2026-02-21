@@ -90,7 +90,8 @@ use {
 
 ### Optional Dependencies
 
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fuzzy finder picker (`require("buf-mark.fzf_lua").pick()`)
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").pick()`)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").pick()`)
 
 ## Configuration
 
@@ -275,18 +276,30 @@ Delete all buffer marks for the current project.
 require("buf-mark").delete_all()
 ```
 
-## fzf-lua Picker
+## Fuzzy Finder Pickers
 
-The `buf-mark.fzf_lua` module provides a fuzzy finder for buf-marks using [fzf-lua](https://github.com/ibhagwan/fzf-lua). This lets you fuzzy find marks by character or filename and jump directly to the selected buffer.
+Both pickers show a file preview at the current cursor position and support `ctrl-x` to delete the selected mark (the picker reopens automatically to allow deleting multiple marks).
+
+### fzf-lua
 
 ```lua
 require("buf-mark.fzf_lua").pick()
 ```
 
-You can bind this to a keymap for quick access:
+### telescope.nvim
 
 ```lua
+require("buf-mark.telescope").pick()
+```
+
+### Example keymaps
+
+```lua
+-- fzf-lua
 vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pick buf-mark (fzf-lua)" })
+
+-- telescope
+vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "Pick buf-mark (telescope)" })
 ```
 
 ## Events
