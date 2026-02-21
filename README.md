@@ -88,6 +88,10 @@ use {
 }
 ```
 
+### Optional Dependencies
+
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fuzzy finder picker (`require("buf-mark.fzf_lua").pick()`)
+
 ## Configuration
 
 ### Setup Options
@@ -269,6 +273,20 @@ Delete all buffer marks for the current project.
 **Example:**
 ```lua
 require("buf-mark").delete_all()
+```
+
+## fzf-lua Picker
+
+The `buf-mark.fzf_lua` module provides a fuzzy finder for buf-marks using [fzf-lua](https://github.com/ibhagwan/fzf-lua). This lets you fuzzy find marks by character or filename and jump directly to the selected buffer.
+
+```lua
+require("buf-mark.fzf_lua").pick()
+```
+
+You can bind this to a keymap for quick access:
+
+```lua
+vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pick buf-mark (fzf-lua)" })
 ```
 
 ## Events
