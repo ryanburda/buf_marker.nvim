@@ -20,8 +20,8 @@ Global marks are bookmarks that work across different files.
   - Remembers both the file and the exact position (line and column)
   - Can jump to them from any buffer
 
-### Automatic Marks
-Vim automatically keeps track of several marks for you.
+### Special Marks
+Vim automatically keeps track of several special marks for you.
   - `'` - Position before the latest jump within the current file
   - `` ` `` - Position of the cursor when last editing this file
   - `"` - Position where the cursor was when last exiting the file `<--- more foreshadowing`

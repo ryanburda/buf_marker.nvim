@@ -3,6 +3,7 @@ local T = {}
 T.setup = function()
   local buf_mark = require('buf-mark')
 
+  -- <leader>m{char} set buf-mark
   vim.keymap.set(
     'n',
     '<leader>m',
@@ -14,17 +15,7 @@ T.setup = function()
     { desc = 'BufMark: Set' }
   )
 
-  vim.keymap.set(
-    'n',
-    '<leader>M',
-    function()
-      -- The next character typed will be the buffer mark character to use
-      local char = vim.fn.getcharstr()
-      buf_mark.delete(char)
-    end,
-    { desc = 'BufMark: Delete' }
-  )
-
+  -- <leader>'{char} goto buf-mark
   vim.keymap.set(
     'n',
     "<leader>'",
@@ -34,20 +25,6 @@ T.setup = function()
       buf_mark.goto(char)
     end,
     { desc = 'BufMark: Goto' }
-  )
-
-  vim.keymap.set(
-    'n',
-    "<leader>'<Tab>",
-    ':b#<cr>',
-    { desc = 'BufMark: Goto alternate buffer' }
-  )
-
-  vim.keymap.set(
-    'n',
-    "<leader>'?",
-    buf_mark.list_pretty,
-    { desc = 'BufMark: List' }
   )
 end
 

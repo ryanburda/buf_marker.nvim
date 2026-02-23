@@ -14,16 +14,16 @@ Both approaches have limitations:
 - Fuzzy finders require you to type out enough of the filename to narrow the results down
 
 ## Solution
-Unlike vim's traditional marks which remember positions within a file, buffer marks remember entire buffers. When
-you jump to a buffer mark the cursor position is automatically restored to where you last left it.
+Unlike vim's native marks which remembers a location within a file, buf-marks remember entire buffers. When
+you jump to a buf-mark the cursor position is automatically restored to where you last left it.
 
 ![](./docs/buf-mark.gif)
 
 ### Features
-- **Buffer Marks**: Set marks to buffers using single characters (similar to vim's global marks)
+- **Buffer Marks**: Mark a buffer with a single character
 - **Cursor Position Preservation**: Automatically saves and restores cursor position when leaving and entering marked buffers
-- **Mark Persistence**: Optionally persist marks across Neovim sessions, saved per working directory
-- **Simple API**: Easy-to-use functions for setting, deleting, and jumping to buffer marks
+- **Mark Persistence**: Optionally persist marked buffers across Neovim sessions, saved per working directory
+- **Simple API**: Easy-to-use functions for setting, deleting, and jumping to marked buffers
 - **Customizable Keymaps**: Default keymaps provided, but can be disabled for custom configuration
 
 ### Differences from Native Vim Marks
@@ -35,27 +35,14 @@ you jump to a buffer mark the cursor position is automatically restored to where
 | **Persistence** | Lost when buffer is deleted | Optionally persists across sessions |
 | **Use Case** | Bookmarking locations within files | Quick buffer switching |
 
-### Do I need this plugin?
-
-Native Vim marks can actually be used to achieve similar buffer-switching behavior. For a simple,
-lightweight alternative that doesn't require a plugin, see [Using Native Marks](docs/using_native_marks.md).
-
-This plugin provides additional features like mark persistence across sessions and status line integrations,
-but the native marks approach may be sufficient for many workflows.
-
 ## Usage
-
-### Default Keymaps
 
 The default keymaps mirror native marks but are prefixed with `<leader>`:
 
 | keymap | function |
 |--------|----------|
-| `<leader>m{char}` | Set buffer mark `{char}` for the current buffer |
-| `<leader>'{char}` | Jump to buffer mark `{char}` |
-| `<leader>'<Tab>`  | Jump to the alternate buffer |
-| `<leader>'?`      | List buffer marks |
-| `<leader>M{char}` | Delete buffer mark `{char}` |
+| `<leader>m{char}` | Set buf-mark `{char}` for the current buffer |
+| `<leader>'{char}` | Jump to buf-mark `{char}` |
 
 ### Example Workflow
 
@@ -63,6 +50,7 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 2. Press `<leader>mc` to mark this buffer with character `c`
 3. Navigate to another file
 4. Press `<leader>'c` to instantly jump back to `config.lua` at the exact cursor position you left
+
 
 ## Installation
 
@@ -122,7 +110,7 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 
 ### `:BufMarkList`
 
-Lists all buffer marks with their associated files. The output displays:
+Lists all buf-marks with their associated files. The output displays:
 - Mark character
 - File path (relative to current directory)
 
@@ -136,7 +124,7 @@ mark  file
 
 ### `:BufMarkSet <char>`
 
-Set a buffer mark for the current buffer using the specified character.
+Set a buf-mark for the current buffer using the specified character.
 
 **Example:**
 ```
@@ -145,7 +133,7 @@ Set a buffer mark for the current buffer using the specified character.
 
 ### `:BufMarkDelete <char>`
 
-Delete the buffer mark for the specified character.
+Delete the buf-mark for the specified character.
 
 **Example:**
 ```
@@ -163,7 +151,7 @@ Jump to the buffer associated with the specified mark character.
 
 ### `:BufMarkDeleteAll`
 
-Delete all buffer marks for the current project. This will clear all marks in the current working directory if buffer marks are being persisted.
+Delete all buf-marks for the current project. This will clear all marks in the current working directory if buf-marks are being persisted.
 
 **Example:**
 ```
@@ -198,7 +186,7 @@ require("buf-mark").setup({
 
 ### `list()`
 
-Returns all buffer marks as a table mapping characters to file paths.
+Returns all buf-marks as a table mapping characters to file paths.
 
 **Returns:**
 - `table`: A table where keys are mark characters and values are file paths
@@ -213,7 +201,7 @@ end
 
 ### `list_pretty()`
 
-Display all buffer marks with their associated buffer information in a formatted view.
+Display all buf-marks with their associated buffer information in a formatted view.
 
 **Example:**
 ```lua
@@ -222,7 +210,7 @@ require("buf-mark").list_pretty()
 
 ### `set(char)`
 
-Set a buffer mark for the current buffer.
+Set a buf-mark for the current buffer.
 
 **Parameters:**
 - `char` (string): A single character to use as the mark identifier
@@ -234,7 +222,7 @@ require("buf-mark").set('a')
 
 ### `delete(char)`
 
-Delete a buffer mark.
+Delete a buf-mark.
 
 **Parameters:**
 - `char` (string): The mark character to delete
@@ -258,7 +246,7 @@ require("buf-mark").goto('a')
 
 ### `delete_all()`
 
-Delete all buffer marks for the current project.
+Delete all buf-marks for the current project.
 
 **Example:**
 ```lua
@@ -352,6 +340,15 @@ vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pi
 -- telescope
 vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "Pick buf-mark (telescope)" })
 ```
+
+
+## Do I need this plugin?
+
+Native Vim marks can actually be used to achieve similar buffer-switching behavior. For a simple,
+lightweight alternative that doesn't require a plugin, see [Using Native Marks](docs/using_native_marks.md).
+
+This plugin provides additional features like mark persistence across sessions and status line integrations,
+but the native marks approach may be sufficient for many workflows.
 
 
 ## License
