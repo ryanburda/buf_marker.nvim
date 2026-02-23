@@ -80,8 +80,8 @@ vim.keymap.set(
   'n',
   "'?",
   require('buf-mark').list_pretty,
-  -- require("buf-mark.fzf_lua").pick,
-  -- require("buf-mark.telescope").pick,
+  -- require("buf-mark.fzf_lua").picker,
+  -- require("buf-mark.telescope").picker,
   { desc = 'List buf-marks' }
 )
 

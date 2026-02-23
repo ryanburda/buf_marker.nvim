@@ -1,6 +1,6 @@
 local T = {}
 
-T.pick = function()
+T.picker = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 
@@ -72,7 +72,7 @@ T.pick = function()
         local char = selected[1]:match("^[^:]*:[^:]*:[^:]*:(%S+)")
         if char then
           buf_mark.delete(char)
-          T.pick()
+          T.picker()
         end
       end,
     },

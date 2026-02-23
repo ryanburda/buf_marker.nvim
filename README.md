@@ -102,8 +102,8 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 
 ### Optional Dependencies
 
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").pick()`)
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").pick()`)
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").picker()`)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").picker()`)
 
 
 ## Commands
@@ -316,29 +316,29 @@ Buf-marks contains pickers for both [fzf-lua](https://github.com/ibhagwan/fzf-lu
 file preview at the current cursor position and support `ctrl-x` to delete the selected mark.
 
 No additional setup is required for either picker. If you have Fzf-lua or Telescope installed,
-you can call the corresponding `pick` function directly. Calling the `pick` function for a
+you can call the corresponding `picker` function directly. Calling the `picker` function for a
 fuzzy finder that is not installed will result in an error.
 
 ### fzf-lua
 
 ```lua
-require("buf-mark.fzf_lua").pick()
+require("buf-mark.fzf_lua").picker()
 ```
 
 ### telescope.nvim
 
 ```lua
-require("buf-mark.telescope").pick()
+require("buf-mark.telescope").picker()
 ```
 
 ### Example keymaps
 
 ```lua
 -- fzf-lua
-vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pick buf-mark (fzf-lua)" })
+vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").picker, { desc = "Buf-mark: fzf-lua picker" })
 
 -- telescope
-vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "Pick buf-mark (telescope)" })
+vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").picker, { desc = "Buf-mark: telescope picker" })
 ```
 
 

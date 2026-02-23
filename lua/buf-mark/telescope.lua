@@ -1,6 +1,6 @@
 local T = {}
 
-T.pick = function(opts)
+T.picker = function(opts)
   opts = opts or {}
 
   local pickers = require("telescope.pickers")
@@ -131,7 +131,7 @@ T.pick = function(opts)
           buf_mark.delete(selection.value.char)
           actions.close(prompt_bufnr)
           vim.schedule(function()
-            T.pick(opts)
+            T.picker(opts)
           end)
         end
       end)
