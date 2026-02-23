@@ -50,12 +50,16 @@ T.pick = function()
   end
 
   fzf_lua.fzf_exec(entries, {
-    prompt = "BufMarks> ",
+    prompt = " > ",
     previewer = "builtin",
+    winopts = {
+      title = " Buf-marks ",
+      title_pos = "center",
+    },
     fzf_opts = {
       ["--delimiter"] = ":",
       ["--with-nth"] = "4..",
-      ["--header"] = "ctrl-x: delete mark",
+      ["--header"] = "ctrl-x: delete buf-mark",
     },
     actions = {
       ["default"] = function(selected)

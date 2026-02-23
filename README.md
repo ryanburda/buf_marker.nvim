@@ -88,13 +88,6 @@ use {
 }
 ```
 
-### Optional Dependencies
-
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").pick()`)
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").pick()`)
-
-## Configuration
-
 ### Setup Options
 
 ```lua
@@ -105,7 +98,10 @@ require("buf-mark").setup({
   -- Marks will be saved per working directory
   -- (e.g., marks in ~/project-a are separate from ~/project-b)
   persist = true,
-  -- Customize status highlight groups
+  -- Customize the optional status highlight groups. (See Status section of README for more details)
+  -- By default, the status module uses `StatusLine` for the current buffer's mark
+  -- and `StatusLineNC` for marks of non-current buffers. You can customize these
+  -- highlight groups to match your colorscheme or configuration.
   status = {
     hl_current = 'StatusLine',       -- Highlight group for current buffer's mark
     hl_non_current = 'StatusLineNC', -- Highlight group for non-current buffers' marks
@@ -113,21 +109,14 @@ require("buf-mark").setup({
 })
 ```
 
-#### Status Highlight Groups
-
-By default, the status module uses `StatusLine` for the current buffer's mark and `StatusLineNC` for marks of non-current buffers. You can customize these highlight groups to match your colorscheme or statusline configuration:
-
-```lua
-require("buf-mark").setup({
-  status = {
-    hl_current = 'TabLineSel',      -- Use TabLineSel for current buffer's mark
-    hl_non_current = 'TabLine',     -- Use TabLine for non-current buffers' marks
-  }
-})
-```
-
 For an alternative keymap configuration that repurposes native local mark keybindings for
 buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
+
+### Optional Dependencies
+
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").pick()`)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").pick()`)
+
 
 ## Commands
 
@@ -181,7 +170,7 @@ Delete all buffer marks for the current project. This will clear all marks in th
 :BufMarkDeleteAll
 ```
 
-## API
+## Lua API
 
 ### `setup(opts)`
 
@@ -201,8 +190,8 @@ require("buf-mark").setup({
   keymaps = true,
   persist = true,
   status = {
-    hl_current = 'TabLineSel',
-    hl_non_current = 'TabLine',
+    hl_current = 'StatusLine',
+    hl_non_current = 'StatusLineNC',
   }
 })
 ```
@@ -276,32 +265,6 @@ Delete all buffer marks for the current project.
 require("buf-mark").delete_all()
 ```
 
-## Fuzzy Finder Pickers
-
-Both pickers show a file preview at the current cursor position and support `ctrl-x` to delete the selected mark (the picker reopens automatically to allow deleting multiple marks).
-
-### fzf-lua
-
-```lua
-require("buf-mark.fzf_lua").pick()
-```
-
-### telescope.nvim
-
-```lua
-require("buf-mark.telescope").pick()
-```
-
-### Example keymaps
-
-```lua
--- fzf-lua
-vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pick buf-mark (fzf-lua)" })
-
--- telescope
-vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "Pick buf-mark (telescope)" })
-```
-
 ## Events
 
 ### `BufMarkChanged`
@@ -312,9 +275,8 @@ A custom User autocommand event that fires whenever:
 - the user enters or deletes a buffer. (`BufEnter`, `BufDelete`)
 
 **Use cases:**
-- Update a statusline component showing current marks
-- Display notifications when marks change
 - Implement custom mark visualization similar to [Status](#status) shown below
+- Display notifications when marks change
 
 ## Status
 
@@ -328,7 +290,8 @@ This is useful for integrating buf-mark information into statuslines, tablines, 
 Over time, you'll accumulate marks for many buffers across your project. Displaying all marks would create
 visual clutter and make it harder to find the information you need. By showing only marks for currently open
 buffers, the status display provides focus and context for the specific problem you're working on right now.
-If you need to see all marks, you can list them separately using `:BufMarkList`.
+If you need to see all marks, you can list them separately using `:BufMarkList` or by using one of
+the [fuzzy finder integrations](#fuzzy-finder-integrations)
 
 **Features:**
 - Shows marks in alphabetical order, highlighting the current buffers mark
@@ -356,6 +319,40 @@ require('lualine').setup({
   }
 })
 ```
+
+
+## Fuzzy Finder Integrations
+
+Buf-marks contains pickers for both [fzf-lua](https://github.com/ibhagwan/fzf-lua) and
+[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim). Both pickers show a
+file preview at the current cursor position and support `ctrl-x` to delete the selected mark.
+
+No additional setup is required for either picker. If you have Fzf-lua or Telescope installed,
+you can call the corresponding `pick` function directly. Calling the `pick` function for a
+fuzzy finder that is not installed will result in an error.
+
+### fzf-lua
+
+```lua
+require("buf-mark.fzf_lua").pick()
+```
+
+### telescope.nvim
+
+```lua
+require("buf-mark.telescope").pick()
+```
+
+### Example keymaps
+
+```lua
+-- fzf-lua
+vim.keymap.set('n', "<leader>'l", require("buf-mark.fzf_lua").pick, { desc = "Pick buf-mark (fzf-lua)" })
+
+-- telescope
+vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "Pick buf-mark (telescope)" })
+```
+
 
 ## License
 
