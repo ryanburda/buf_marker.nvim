@@ -71,22 +71,6 @@ function M.setup(opts)
     pattern = 'BufMarkChanged',
     callback = update
   })
-
-  vim.api.nvim_create_autocmd({'BufEnter'}, {
-    callback = update
-  })
-
-  -- BufDelete fires before the deletion takes place.
-  -- Deferring the update allows enough time for the
-  -- buffer to be deleted before updating the status.
-  --
-  -- NOTE: this does cause a small delay which is why it is separate from the BufEnter autocmd above.
-  vim.api.nvim_create_autocmd({'BufEnter', 'BufDelete'}, {
-    callback = function()
-      vim.defer_fn(update, 0)
-    end
-  })
-
 end
 
 function M.get()

@@ -306,7 +306,10 @@ vim.keymap.set('n', "<leader>'l", require("buf-mark.telescope").pick, { desc = "
 
 ### `BufMarkChanged`
 
-A custom User autocommand event that fires whenever the set of buffer marks changes. This event is triggered after marks are set, deleted, or cleared.
+A custom User autocommand event that fires whenever:
+- a buf-mark is added or deleted
+- all buf-marks are cleared
+- the user enters or deletes a buffer. (`BufEnter`, `BufDelete`)
 
 **Use cases:**
 - Update a statusline component showing current marks

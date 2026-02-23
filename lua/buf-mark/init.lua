@@ -192,6 +192,22 @@ T.setup = function(opts)
     load_marks()
   end
 
+  -- Fire BufMarkChanged when the user switches buffers.
+  vim.api.nvim_create_autocmd('BufEnter', {
+    callback = trigger_marks_changed_event,
+  })
+
+  -- Fire BufMarkChanged when the user deletes a buffer.
+  --
+  -- BufDelete fires before the deletion takes place.
+  -- Scheduling the update allows enough time for the
+  -- buffer to be deleted before updating the status.
+  vim.api.nvim_create_autocmd({'BufDelete'}, {
+    callback = function()
+      vim.schedule(trigger_marks_changed_event)
+    end
+  })
+
   -- Cursor position autocommands.
   vim.api.nvim_create_augroup('BufMarkSaveCursorPos', { clear = true })
 
