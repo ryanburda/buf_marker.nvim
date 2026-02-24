@@ -54,21 +54,17 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 
 ## Installation
 
+### [vim.pack](https://neovim.io/doc/user/pack.html) (Neovim 0.12+)
+
+```lua
+vim.pack.add({ 'https://github.com/ryanburda/buf-mark' })
+require("buf-mark").setup()
+```
+
 ### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
-  "ryanburda/buf-mark",
-  config = function()
-    require("buf-mark").setup()
-  end,
-}
-```
-
-### [packer.nvim](https://github.com/wbthomason/packer.nvim)
-
-```lua
-use {
   "ryanburda/buf-mark",
   config = function()
     require("buf-mark").setup()
