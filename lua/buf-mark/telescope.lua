@@ -135,8 +135,9 @@ T.picker = function(opts)
           preview = opts.preview,
           callback = function(bufnr)
             if entry.lnum and entry.lnum > 0 then
-              pcall(vim.api.nvim_buf_add_highlight,
-                bufnr, -1, "TelescopePreviewLine", entry.lnum - 1, 0, -1)
+              pcall(vim.api.nvim_buf_set_extmark,
+                bufnr, vim.api.nvim_create_namespace('buf-mark-preview'), entry.lnum - 1, 0,
+                { line_hl_group = 'TelescopePreviewLine' })
               pcall(vim.api.nvim_win_set_cursor,
                 self.state.winid, { entry.lnum, 0 })
               vim.api.nvim_buf_call(bufnr, function()
