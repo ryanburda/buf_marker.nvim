@@ -1,13 +1,12 @@
 --[[
 Shows buf-marks for buffers that are currently open.
-  - Highlights the current buffers mark
-  - Indicates if current buffer does not have a mark
   - Marks are shown in alphabetical order
-  - Can be used in places like tabline or statusline
+  - Highlights mark of current buffer
+  - Can be used in places like statusline, winbar, or tabline
 ]]
 local M = {}
 
-Info = ''
+local Info = ''
 
 -- Default configuration
 local config = {
@@ -27,36 +26,25 @@ local function update()
   table.sort(sorted_marks, function(a, b) return a.char < b.char end)
 
   -- Get buffers
-  local open_bufs = {}
+  local buffers = {}
   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
     if vim.api.nvim_buf_is_loaded(bufnr) then
-      table.insert(open_bufs, bufnr)
+      buffers[vim.api.nvim_buf_get_name(bufnr)] = true
     end
   end
 
+  -- Get current buffer name
   local current_buf_name = vim.api.nvim_buf_get_name(0)
-  local current_buf_is_marked = false
 
-  -- Loop through marks
   for _, mark in ipairs(sorted_marks) do
-    -- Loop through buffers
-    for _, bufnr in ipairs(open_bufs) do
-      local buf_name = vim.api.nvim_buf_get_name(bufnr)
-      if mark.path == buf_name then
-        if mark.path == current_buf_name then
-          s = s .. '%#' .. config.hl_current .. '#'
-          current_buf_is_marked = true
-        else
-          s = s .. '%#' .. config.hl_non_current .. '#'
-        end
-        s = s .. ' ' .. mark.char .. ' '
+    if buffers[mark.path] then
+      if mark.path == current_buf_name then
+        s = s .. '%#' .. config.hl_current .. '#'
+      else
+        s = s .. '%#' .. config.hl_non_current .. '#'
       end
+      s = s .. ' ' .. mark.char .. ' '
     end
-  end
-
-  -- Show current buffer if not already shown
-  if not current_buf_is_marked then
-    s = s .. '%#' .. config.hl_current .. '#  '
   end
 
   Info = s .. '%*'

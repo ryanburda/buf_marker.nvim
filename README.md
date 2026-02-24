@@ -49,7 +49,7 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 1. Open a file (e.g., `config.lua`)
 2. Press `<leader>mc` to mark this buffer with character `c`
 3. Navigate to another file
-4. Press `<leader>'c` to instantly jump back to `config.lua` at the exact cursor position you left
+4. Press `<leader>'c` to go back to `config.lua`
 
 
 ## Installation
