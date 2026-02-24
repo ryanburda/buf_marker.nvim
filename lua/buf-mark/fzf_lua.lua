@@ -1,7 +1,21 @@
 local T = {}
 
+local function get_file_icon(filename)
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  if ok then
+    return devicons.get_icon(filename, nil, { default = true })
+  end
+  local ok2, mini_icons = pcall(require, "mini.icons")
+  if ok2 then
+    local _, icon, hl = mini_icons.get("file", filename)
+    return icon, hl
+  end
+  return nil, nil
+end
+
 T.picker = function()
   local fzf_lua = require("fzf-lua")
+  local fzf_utils = require("fzf-lua.utils")
   local buf_mark = require("buf-mark")
 
   local marks = buf_mark.list()
@@ -46,11 +60,17 @@ T.picker = function()
       end
     end
 
-    table.insert(entries, string.format("%s:%d:%d:%s    %s", mark.path, line, col, mark.char, display_path))
+    local icon_str = ""
+    local icon, icon_hl = get_file_icon(vim.fn.fnamemodify(mark.path, ":t"))
+    if icon and icon_hl then
+      icon_str = fzf_utils.ansi_from_hl(icon_hl, icon) .. " "
+    end
+
+    table.insert(entries, string.format("%s:%d:%d:%s    %s%s", mark.path, line, col, mark.char, icon_str, display_path))
   end
 
   fzf_lua.fzf_exec(entries, {
-    prompt = " > ",
+    prompt = "> ",
     previewer = "builtin",
     winopts = {
       title = " Buf-marks ",
@@ -59,7 +79,9 @@ T.picker = function()
     fzf_opts = {
       ["--delimiter"] = ":",
       ["--with-nth"] = "4..",
-      ["--header"] = "ctrl-x: delete buf-mark",
+      ["--header"] = string.format(":: <%s> to %s",
+        fzf_utils.ansi_from_hl("FzfLuaHeaderBind", "ctrl-x"),
+        fzf_utils.ansi_from_hl("FzfLuaHeaderText", "delete")),
     },
     actions = {
       ["default"] = function(selected)
