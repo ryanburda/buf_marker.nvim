@@ -104,6 +104,7 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 
 - [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").picker()`)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").picker()`)
+- [nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) or [mini.icons](https://github.com/echasnovski/mini.icons) - Colored file type icons in the pickers. Falls back gracefully if neither is installed.
 
 
 ## Commands

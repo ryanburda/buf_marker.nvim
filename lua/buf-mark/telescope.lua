@@ -1,5 +1,18 @@
 local T = {}
 
+local function get_file_icon(filename)
+  local ok, devicons = pcall(require, "nvim-web-devicons")
+  if ok then
+    return devicons.get_icon(filename, nil, { default = true })
+  end
+  local ok2, mini_icons = pcall(require, "mini.icons")
+  if ok2 then
+    local _, icon, hl = mini_icons.get("file", filename)
+    return icon, hl
+  end
+  return nil, nil
+end
+
 T.picker = function(opts)
   opts = opts or {}
 
@@ -55,16 +68,35 @@ T.picker = function(opts)
     mark.col = col
   end
 
-  local displayer = entry_display.create({
-    separator = "    ",
-    items = {
-      { width = 1 },
-      { remaining = true },
-    },
-  })
+  local has_icons = get_file_icon("x") ~= nil
+
+  local displayer = entry_display.create(has_icons
+    and {
+      separator = " ",
+      items = {
+        { width = 4 },
+        { width = 2 },
+        { remaining = true },
+      },
+    }
+    or {
+      separator = "    ",
+      items = {
+        { width = 1 },
+        { remaining = true },
+      },
+    })
 
   local make_display = function(entry)
     local display_path = vim.fn.fnamemodify(entry.value.path, ":~:.")
+    if has_icons then
+      local file_icon, icon_hl = get_file_icon(vim.fn.fnamemodify(entry.value.path, ":t"))
+      return displayer({
+        entry.value.char,
+        { file_icon or "", icon_hl },
+        display_path,
+      })
+    end
     return displayer({
       entry.value.char,
       display_path,
@@ -72,7 +104,7 @@ T.picker = function(opts)
   end
 
   pickers.new(opts, {
-    prompt_title = "BufMarks (ctrl-x: delete mark)",
+    prompt_title = "Buf-marks (<ctrl-x> to delete)",
 
     finder = finders.new_table({
       results = mark_list,
