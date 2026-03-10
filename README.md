@@ -5,7 +5,7 @@ A Neovim plugin that provides vim-like marks for buffers.
 TODO: Add gif
 
 Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnemonic characters to buffers.
-Mark your `config.lua` with `c`, your `main.py` with `m`, or your README with `r`.
+Mark your `init.lua` with `i`, your `main.rs` with `m`, or your `README.md` with `r`.
 In doing so you create a personal shorthand that's faster than fuzzy finding and more intentional than cycling.
 Buf-marks are persisted per working directory across sessions, allowing your shorthand to become a stable part
 of your workflow.
@@ -29,10 +29,10 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 
 ### Example Workflow
 
-1. Open a file (e.g., `config.lua`)
-2. Press `<leader>mc` to mark the current buffer with character `c`
+1. Open a file (e.g., `init.lua`)
+2. Press `<leader>mi` to mark the current buffer with character `i`
 3. Navigate to another file
-4. Press `<leader>'c` to go back to `config.lua` where you left it
+4. Press `<leader>'i` to go back to `init.lua` where you left it
 
 
 ## Installation
@@ -264,7 +264,7 @@ Marks are shown in alphabetical order with the mark of the current buffer highli
 
 **Why only show marks for open buffers?**
 
-Over time, you'll accumulate marks for many buffers across your project. Displaying all marks would create
+Over time, you'll accumulate marks for many buffers across a given project. Displaying all marks would create
 visual clutter and make it harder to find the information you need. By showing only marks for currently open
 buffers, the status display provides focus and context for the specific problem you're working on right now.
 If you need to see all marks, you can list them separately using `:BufMarkList` or by using one of
@@ -315,8 +315,8 @@ require("buf-mark.telescope").picker()
 Native Vim marks can actually be used to achieve similar buffer-switching behavior. For an alternative
 that doesn't require a plugin, see [Using Native Marks](docs/using_native_marks.md).
 
-This plugin provides additional features like mark persistence across sessions and status line integrations,
-but the native marks approach may be sufficient for many workflows.
+**TLDR:** This plugin provides additional features like ergonomic keymaps, mark persistence across sessions,
+and status line integrations, but the native marks approach may be sufficient for many workflows.
 
 
 ## License
