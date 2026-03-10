@@ -2,7 +2,7 @@
 
 A Neovim plugin that provides vim-like marks for buffers.
 
-TODO: Add gif
+![](./docs/buf-mark.gif)
 
 Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnemonic characters to buffers.
 Mark your `init.lua` with `i`, your `main.rs` with `m`, or your `README.md` with `r`.
