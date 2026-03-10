@@ -1,18 +1,16 @@
 # Author's Keymaps
 
-This document describes an alternative keymap configuration that I prefer, which may serve as inspiration for your own setup.
+Switching buffers is one of the most frequent actions in a Neovim workflow, so the keymaps for it should be as
+ergonomic as possible. This keymap configuration lets you jump to a specific buffer in just 2 keystrokes.
 
-## Philosophy
+It works by repurposing keybindings that I find less useful in practice. I rarely use local marks since most of
+the time I mark a few locations per session and want to jump to them from any buffer, making global marks the
+better fit. Similarly, Vim's special marks 1-9 (which track progressively older exit positions) require
+remembering what was open when you last quit Vim, which I never do. Mark 0 (last exit location) is sometimes
+helpful, though.
 
-In typical Neovim usage, I rarely find myself using local marks. Most of the time I mark a few locations per
-session and want to be able to jump to those marks from any buffer. This is why I generally prefer global marks.
-
-Similarly, I don't find Vim's special marks 1-9 (which keep track of progressively older exit positions) useful
-since they require remembering location that was up at the time you quit vim. Mark 0 (last exit location) however
-is sometimes helpful.
-
-This keymap configuration repurposes the local mark and special mark 1-9 keybindings for buf-marks instead,
-making buffer navigation more ergonomic while still preserving navigation to vim's
+By reassigning the local mark and special mark 1-9 keybindings to buf-marks, buffer navigation becomes a quick
+2-keystroke operation while still preserving access to global marks and Vim's
 [special marks](https://vimhelp.org/motion.txt.html#mark-motions) (`` `'".^[]<> ``)
 
 ## Keymap Strategy

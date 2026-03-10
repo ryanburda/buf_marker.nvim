@@ -13,7 +13,7 @@ Local marks are bookmarks that work within a single buffer.
   - Only accessible within the buffer where they were set
   - Lost when the buffer is deleted
 
-### Global Marks `<--- foreshadowing`
+### Global Marks
 Global marks are bookmarks that work across different files.
   - Created using uppercase letters (A-Z): `mA`, `mB`, etc.
   - Jump to a global mark with `'A` (single quote) or `` `A ``
@@ -24,7 +24,7 @@ Global marks are bookmarks that work across different files.
 Vim automatically keeps track of several special marks for you.
   - `'` - Position before the latest jump within the current file
   - `` ` `` - Position of the cursor when last editing this file
-  - `"` - Position where the cursor was when last exiting the file `<--- more foreshadowing`
+  - `"` - Position where the cursor was when last exiting the file
   - `[` - First character of previously changed or yanked text
   - `]` - Last character of previously changed or yanked text
   - `<` - First character of last visual selection
@@ -35,7 +35,7 @@ Vim automatically keeps track of several special marks for you.
 ### Difference between `'` and `` ` `` when jumping to marks
 Backtick (`` `{mark} ``) jumps to the exact position (line and column) where the mark was set, while
 single quote (`'{mark}`) jumps to the first non-blank character of that line.
-- Use backtick for precise positioning `<--- even more foreshadowing!!`
+- Use backtick for precise positioning
 - Use single quote when you only care about getting to the right line
 
 **Example:**
@@ -75,29 +75,32 @@ solution of typing `` '{mark}`" `` requires a bit of keyboard gymnastics.
 ## Solution 2
 We can create a keymap to make `` '{mark}'` `` more ergonomic.
 
-There are several ways this can be done. The following chooses to make `'{mark}` perform `` '{mark}'` `` for
-us (for global marks only), though other keymaps that don't override default behavior can be created as well.
+There are several ways this can be done. The following maps `<leader>'` to jump to a global mark and
+automatically restore cursor position.
 
 ```lua
 vim.keymap.set(
   'n',
-  "'",
+  "<leader>'",
   function()
     -- Get the next character that is typed
     local char = vim.fn.getcharstr()
+
+    -- Only handle uppercase (global) marks
+    if not char:match("%u") then
+      return
+    end
 
     -- Go to mark
     local ok, err = pcall(vim.cmd, "normal! '" .. char)
     if not ok then
       local vim_err = err:match("Vim%([^)]+%):(.*)") or err
       vim.api.nvim_echo({{vim_err, "ErrorMsg"}}, true, {})
+      return
     end
 
-    -- If we just jumped to a global mark (upper case character), go
-    -- to the position where the cursor was when last exiting the file
-    if char:match("%u") then
-      vim.api.nvim_feedkeys('`"', 'n', false)
-    end
+    -- Go to the position where the cursor was when last exiting the file
+    vim.api.nvim_feedkeys('`"', 'n', false)
   end,
   { desc = 'Go to buffer' }
 )
@@ -105,21 +108,12 @@ vim.keymap.set(
 
 Here's what it does:
 
-1. Captures the next character: When you press `'`, it waits for you to type a mark character (like `'A` or `'b`).
-2. Jumps to the specified mark.
-3. Error handling: If the mark doesn't exist, it catches the error and displays a cleaned-up error message.
-4. Special behavior for global marks: If the character is an uppercase letter, after jumping to the mark's line,
-it additionally executes `` `" `` which jumps to the exact position where the cursor was when you last exited that file.
-
-This effectively means:
-- `'a` through `'z` - Jump to local mark (standard behavior)
-- `'A` through `'Z` - Jump to global mark, then jump to last exit position in that file
-
-This combines mark navigation with Vim's "last position" feature. In a way it makes global marks behave more
-like "buffer marks".
-
-**NOTE:** If you want to jump to the exact location of a global mark you can still use `` `<mark> ``.
-
+1. Captures the next character: When you press `<leader>'`, it waits for you to type a mark character (like `A`).
+2. Ignores non-uppercase characters, since only global marks (A-Z) are used for cross-buffer navigation.
+3. Jumps to the specified global mark.
+4. Error handling: If the mark doesn't exist, it catches the error and displays a cleaned-up error message.
+5. After jumping to the mark's line, it executes `` `" `` which jumps to the exact position where the
+cursor was when you last exited that file.
 
 ## Then why use `buf-mark`?
 
