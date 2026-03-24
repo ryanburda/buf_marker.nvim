@@ -139,6 +139,15 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```
 > :BufMarkDeleteAll
 > ```
+>
+> #### `:BufMarkLoadWorktree <path>`
+>
+> Load buf-marks from another git worktree. Marks are rebased so that file paths point to the current working directory. Existing marks in the current worktree are not overwritten.
+>
+> **Example:**
+> ```
+> :BufMarkLoadWorktree ~/code/my-project/main
+> ```
 
 ### Lua API
 
@@ -234,6 +243,18 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```lua
 > require("buf-mark").delete_all()
 > ```
+>
+> #### `load_worktree(path)`
+>
+> Load buf-marks from another git worktree into the current worktree. File paths are rebased so they point to the current working directory. Existing marks are not overwritten.
+>
+> **Parameters:**
+> - `path` (string): Path to the source worktree
+>
+> **Example:**
+> ```lua
+> require("buf-mark").load_worktree("~/code/my-project/main")
+> ```
 
 ## Events
 
@@ -301,14 +322,24 @@ fuzzy finder that is not installed will result in an error.
 ### fzf-lua
 
 ```lua
+-- Browse and jump to buf-marks
 require("buf-mark.fzf_lua").picker()
+-- Load buf-marks from another git worktree into the current worktree
+require("buf-mark.fzf_lua").worktree_picker()
 ```
 
 ### telescope.nvim
 
 ```lua
+-- Browse and jump to buf-marks
 require("buf-mark.telescope").picker()
+-- Load buf-marks from another git worktree into the current worktree
+require("buf-mark.telescope").worktree_picker()
 ```
+
+The `worktree_picker` functions list other git worktrees that have saved buf-marks. Selecting a
+worktree will load its marks into the current worktree, rebasing file paths so they point to the
+correct location. Existing marks in the current worktree are not overwritten.
 
 ## Do I need this plugin?
 

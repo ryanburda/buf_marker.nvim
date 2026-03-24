@@ -21,6 +21,7 @@ By reassigning the local mark and special mark 1-9 keybindings to buf-marks, buf
 - `'{uppercase}` - Goto global mark (normal behavior)
 - `'{other}` - Goto special mark (normal behavior)
 - `'?` - List all buf-marks
+- `'/` - Load buf-marks from another worktree
 - `'<Tab>` - Jump to alternate buffer
 - `<leader>m{char}` - Set a native local mark (fallback for local marks if needed)
 - `<leader>'{char}` - Jump to a native local mark (fallback for local marks if needed)
@@ -77,10 +78,19 @@ vim.keymap.set(
 vim.keymap.set(
   'n',
   "'?",
-  require('buf-mark').list_pretty,
-  -- require("buf-mark.fzf_lua").picker,
+  require("buf-mark.fzf_lua").picker,
   -- require("buf-mark.telescope").picker,
+  -- require('buf-mark').list_pretty,
   { desc = 'List buf-marks' }
+)
+
+-- '/ to load buf-marks from another worktree
+vim.keymap.set(
+  'n',
+  "'/",
+  require("buf-mark.fzf_lua").worktree_picker,
+  -- require("buf-mark.telescope").worktree_picker,
+  { desc = 'Load buf-marks from worktree' }
 )
 
 -- '<Tab> to jump to alternate buffer

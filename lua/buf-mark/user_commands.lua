@@ -27,6 +27,11 @@ T.setup = function()
   vim.api.nvim_create_user_command('BufMarkDeleteAll', function()
     buf_mark.delete_all()
   end, { desc = 'Delete all buffer marks for current project' })
+
+  -- Register the :BufMarkLoadWorktree command
+  vim.api.nvim_create_user_command('BufMarkLoadWorktree', function(opts)
+    buf_mark.load_worktree(opts.args)
+  end, { nargs = 1, complete = 'dir', desc = 'Load buf-marks from another worktree path' })
 end
 
 return T

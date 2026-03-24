@@ -43,12 +43,11 @@ local function save_marks()
   end
 end
 
--- Load marks from disk
-local function load_marks()
-  local storage_path = get_storage_path()
+-- Read marks from a storage file, returns a table or nil
+local function read_marks_file(storage_path)
   local file = io.open(storage_path, 'r')
   if not file then
-    return
+    return nil
   end
 
   local content = file:read('*all')
@@ -57,8 +56,18 @@ local function load_marks()
   if content and content ~= '' then
     local ok, data = pcall(vim.json.decode, content)
     if ok and data and data.marks then
-      marks = data.marks
+      return data.marks
     end
+  end
+  return nil
+end
+
+-- Load marks from disk
+local function load_marks()
+  local storage_path = get_storage_path()
+  local loaded = read_marks_file(storage_path)
+  if loaded then
+    marks = loaded
   end
 end
 
@@ -179,6 +188,82 @@ T.list_pretty = function()
     {"\n" .. table.concat(lines, "\n"), "Normal"}
   }
   vim.api.nvim_echo(output, true, {})
+end
+
+-- List git worktrees (excluding the current working directory) that have buf-mark storage files
+T.list_worktrees = function()
+  local result = vim.fn.systemlist('git worktree list --porcelain')
+  if vim.v.shell_error ~= 0 then
+    return {}
+  end
+
+  local cwd = vim.fn.getcwd()
+  local data_dir = vim.fn.stdpath('data')
+  local storage_dir = data_dir .. '/buf_mark'
+  local worktrees = {}
+
+  for _, line in ipairs(result) do
+    local path = line:match('^worktree (.+)$')
+    if path and path ~= cwd then
+      local hash = vim.fn.sha256(path)
+      local storage_path = storage_dir .. '/' .. hash .. '.json'
+      if vim.fn.filereadable(storage_path) == 1 then
+        table.insert(worktrees, path)
+      end
+    end
+  end
+
+  return worktrees
+end
+
+-- Load buf-marks from another worktree path, without overwriting existing marks
+T.load_worktree = function(worktree_path)
+  if not worktree_path or type(worktree_path) ~= 'string' or worktree_path == '' then
+    vim.api.nvim_echo({{"Please provide a worktree path", "ErrorMsg"}}, true, {})
+    return
+  end
+
+  -- Resolve to absolute path
+  local abs_path = vim.fn.fnamemodify(worktree_path, ':p')
+  -- Remove trailing slash for consistent hashing
+  abs_path = abs_path:gsub('/$', '')
+
+  local data_dir = vim.fn.stdpath('data')
+  local storage_dir = data_dir .. '/buf_mark'
+  local hash = vim.fn.sha256(abs_path)
+  local storage_path = storage_dir .. '/' .. hash .. '.json'
+
+  local loaded = read_marks_file(storage_path)
+  if not loaded then
+    vim.api.nvim_echo({{"No buf-marks found for: " .. abs_path, "WarningMsg"}}, true, {})
+    return
+  end
+
+  -- Rebase paths from the source worktree to the current worktree
+  local cwd = vim.fn.getcwd()
+  -- Ensure trailing slash for prefix matching
+  local source_prefix = abs_path .. '/'
+
+  local count = 0
+  for char, path in pairs(loaded) do
+    if not marks[char] then
+      -- Replace the source worktree prefix with the current working directory
+      if path:sub(1, #source_prefix) == source_prefix then
+        local relative = path:sub(#source_prefix + 1)
+        marks[char] = cwd .. '/' .. relative
+      else
+        marks[char] = path
+      end
+      count = count + 1
+    end
+  end
+
+  if count > 0 then
+    save_marks()
+    trigger_marks_changed_event()
+  end
+
+  vim.api.nvim_echo({{"Loaded " .. count .. " buf-mark(s) from: " .. abs_path, "Normal"}}, true, {})
 end
 
 T.setup = function(opts)

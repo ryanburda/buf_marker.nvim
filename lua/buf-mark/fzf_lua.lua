@@ -101,4 +101,36 @@ T.picker = function()
   })
 end
 
+T.worktree_picker = function()
+  local fzf_lua = require("fzf-lua")
+  local buf_mark = require("buf-mark")
+
+  local worktrees = buf_mark.list_worktrees()
+
+  if #worktrees == 0 then
+    vim.api.nvim_echo({ { "No other worktrees with buf-marks found", "WarningMsg" } }, true, {})
+    return
+  end
+
+  local entries = {}
+  for _, path in ipairs(worktrees) do
+    table.insert(entries, vim.fn.fnamemodify(path, ":~"))
+  end
+
+  fzf_lua.fzf_exec(entries, {
+    prompt = "> ",
+    previewer = false,
+    winopts = {
+      title = " Load buf-marks from worktree ",
+      title_pos = "center",
+    },
+    actions = {
+      ["default"] = function(selected)
+        local path = vim.fn.expand(selected[1])
+        buf_mark.load_worktree(path)
+      end,
+    },
+  })
+end
+
 return T
