@@ -61,6 +61,25 @@ T.read_storage_file = function(storage_path)
   return nil
 end
 
+-- Delete the storage file for a given working directory
+T.remove_storage_file = function(path)
+  if not path or type(path) ~= 'string' or path == '' then
+    vim.api.nvim_echo({{"Please provide a working directory path", "ErrorMsg"}}, true, {})
+    return
+  end
+
+  local abs_path = vim.fn.fnamemodify(path, ':p'):gsub('/$', '')
+  local storage_path = T.get_storage_path(abs_path)
+
+  if vim.fn.filereadable(storage_path) == 0 then
+    vim.api.nvim_echo({{"No storage file found for: " .. abs_path, "WarningMsg"}}, true, {})
+    return
+  end
+
+  os.remove(storage_path)
+  vim.api.nvim_echo({{"Deleted storage file for: " .. abs_path, "Normal"}}, true, {})
+end
+
 -- Trigger a custom autocommand event when marks change
 local function trigger_marks_changed_event()
   vim.api.nvim_exec_autocmds('User', {
@@ -105,7 +124,6 @@ T.load_marks = function(path, opts)
 
   local cwd = vim.fn.getcwd()
   local source_prefix = source_dir .. '/'
-  local count = 0
 
   for char, file_path in pairs(loaded) do
     if force or not marks[char] then
@@ -115,16 +133,11 @@ T.load_marks = function(path, opts)
       else
         marks[char] = file_path
       end
-      count = count + 1
     end
   end
 
-  -- Persist and notify when loading from another project
-  if source_dir ~= cwd and count > 0 then
-    save_marks()
-    trigger_marks_changed_event()
-    vim.api.nvim_echo({{"Loaded " .. count .. " buf-mark(s) from: " .. source_dir, "Normal"}}, true, {})
-  end
+  save_marks()
+  trigger_marks_changed_event()
 end
 
 -- Set a mark for a character to a filepath

@@ -8,7 +8,8 @@ Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnem
 Mark your `init.lua` with `i`, your `main.rs` with `m`, or your `README.md` with `r`.
 In doing so you create a personal shorthand that's faster than fuzzy finding and more intentional than cycling.
 Buf-marks are persisted per working directory across sessions, allowing your shorthand to become a stable part
-of your workflow.
+of your workflow. Working across multiple git worktrees? Buf-marks can be loaded from one worktree into another,
+so your marks follow you as you switch between branches.
 
 ### Differences from Native Vim Marks
 
@@ -149,6 +150,15 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > :BufMarkGetStoragePath
 > :BufMarkGetStoragePath ~/code/my-project
 > ```
+>
+> #### `:BufMarkRemoveStorageFile <path>`
+>
+> Delete the storage file for a working directory. This removes all persisted buf-marks for the given directory.
+>
+> **Example:**
+> ```
+> :BufMarkRemoveStorageFile ~/code/my-project
+> ```
 
 ### Lua API
 
@@ -259,6 +269,18 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```lua
 > local storage_path = require("buf-mark").get_storage_path()
 > -- e.g. "~/.local/share/nvim/buf_mark/abc123...def.json"
+> ```
+>
+> #### `remove_storage_file(path)`
+>
+> Delete the storage file for a given working directory. This removes all persisted buf-marks for that directory.
+>
+> **Parameters:**
+> - `path` (string): The working directory whose storage file should be deleted
+>
+> **Example:**
+> ```lua
+> require("buf-mark").remove_storage_file("~/code/my-project")
 > ```
 >
 > #### `load_marks(path, opts)`

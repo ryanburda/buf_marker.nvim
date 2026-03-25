@@ -35,6 +35,11 @@ T.setup = function()
     vim.api.nvim_echo({{storage_path, "Normal"}}, true, {})
   end, { nargs = '?', complete = 'dir', desc = 'Print the storage file path for a working directory' })
 
+  -- Register the :BufMarkRemoveStorageFile command
+  vim.api.nvim_create_user_command('BufMarkRemoveStorageFile', function(opts)
+    buf_mark.remove_storage_file(opts.args)
+  end, { nargs = 1, complete = 'dir', desc = 'Delete the storage file for a working directory' })
+
 end
 
 return T
