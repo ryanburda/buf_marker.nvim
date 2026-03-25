@@ -105,7 +105,7 @@ T.worktree_picker = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 
-  local worktrees = buf_mark.list_worktrees()
+  local worktrees = require("buf-mark.sources").worktrees()
 
   if #worktrees == 0 then
     vim.api.nvim_echo({ { "No other worktrees with buf-marks found", "WarningMsg" } }, true, {})
@@ -127,7 +127,7 @@ T.worktree_picker = function()
     actions = {
       ["default"] = function(selected)
         local path = vim.fn.expand(selected[1])
-        buf_mark.load_worktree(path)
+        buf_mark.load_marks(path, { force = false, rebase = true })
       end,
     },
   })

@@ -8,17 +8,16 @@ T.config = {
   persist = true
 }
 
--- Get the storage file path for current working directory
-local function get_storage_path()
+-- Get the storage file path for a given working directory (defaults to cwd)
+T.get_storage_path = function(path)
   local data_dir = vim.fn.stdpath('data')
   local storage_dir = data_dir .. '/buf_mark'
 
   -- Create directory if it doesn't exist
   vim.fn.mkdir(storage_dir, 'p')
 
-  -- Generate a hash of the current working directory
-  local cwd = vim.fn.getcwd()
-  local hash = vim.fn.sha256(cwd)
+  local dir = path or vim.fn.getcwd()
+  local hash = vim.fn.sha256(dir)
 
   return storage_dir .. '/' .. hash .. '.json'
 end
@@ -29,7 +28,7 @@ local function save_marks()
     return
   end
 
-  local storage_path = get_storage_path()
+  local storage_path = T.get_storage_path()
   local data = {
     cwd = vim.fn.getcwd(),
     marks = marks
@@ -40,34 +39,6 @@ local function save_marks()
   if file then
     file:write(json_str)
     file:close()
-  end
-end
-
--- Read marks from a storage file, returns a table or nil
-local function read_marks_file(storage_path)
-  local file = io.open(storage_path, 'r')
-  if not file then
-    return nil
-  end
-
-  local content = file:read('*all')
-  file:close()
-
-  if content and content ~= '' then
-    local ok, data = pcall(vim.json.decode, content)
-    if ok and data and data.marks then
-      return data.marks
-    end
-  end
-  return nil
-end
-
--- Load marks from disk
-local function load_marks()
-  local storage_path = get_storage_path()
-  local loaded = read_marks_file(storage_path)
-  if loaded then
-    marks = loaded
   end
 end
 
@@ -86,6 +57,71 @@ local function input_checker(char)
     return false
   end
   return true
+end
+
+-- Load marks from disk for a given path (defaults to cwd).
+--
+-- opts.force:  when true (default), overwrite existing marks.
+-- opts.rebase: when false (default), use paths as-is.
+--              when true, rebase file paths from the source directory to cwd.
+T.load_marks = function(path, opts)
+  opts = opts or {}
+  local force = opts.force ~= false   -- default true
+  local rebase = opts.rebase == true   -- default false
+
+  -- Resolve path to absolute, strip trailing slash
+  local source_dir
+  if path then
+    source_dir = vim.fn.fnamemodify(path, ':p'):gsub('/$', '')
+  else
+    source_dir = vim.fn.getcwd()
+  end
+
+  local storage_path = T.get_storage_path(source_dir)
+
+  -- Read marks from the storage file
+  local file = io.open(storage_path, 'r')
+  if not file then
+    return
+  end
+
+  local content = file:read('*all')
+  file:close()
+
+  local loaded
+  if content and content ~= '' then
+    local ok, data = pcall(vim.json.decode, content)
+    if ok and data and data.marks then
+      loaded = data.marks
+    end
+  end
+
+  if not loaded then
+    return
+  end
+
+  local cwd = vim.fn.getcwd()
+  local source_prefix = source_dir .. '/'
+  local count = 0
+
+  for char, file_path in pairs(loaded) do
+    if force or not marks[char] then
+      if rebase and file_path:sub(1, #source_prefix) == source_prefix then
+        local relative = file_path:sub(#source_prefix + 1)
+        marks[char] = cwd .. '/' .. relative
+      else
+        marks[char] = file_path
+      end
+      count = count + 1
+    end
+  end
+
+  -- Persist and notify when loading from another project
+  if source_dir ~= cwd and count > 0 then
+    save_marks()
+    trigger_marks_changed_event()
+    vim.api.nvim_echo({{"Loaded " .. count .. " buf-mark(s) from: " .. source_dir, "Normal"}}, true, {})
+  end
 end
 
 -- Set a mark for a character to a filepath
@@ -190,82 +226,6 @@ T.list_pretty = function()
   vim.api.nvim_echo(output, true, {})
 end
 
--- List git worktrees (excluding the current working directory) that have buf-mark storage files
-T.list_worktrees = function()
-  local result = vim.fn.systemlist('git worktree list --porcelain')
-  if vim.v.shell_error ~= 0 then
-    return {}
-  end
-
-  local cwd = vim.fn.getcwd()
-  local data_dir = vim.fn.stdpath('data')
-  local storage_dir = data_dir .. '/buf_mark'
-  local worktrees = {}
-
-  for _, line in ipairs(result) do
-    local path = line:match('^worktree (.+)$')
-    if path and path ~= cwd then
-      local hash = vim.fn.sha256(path)
-      local storage_path = storage_dir .. '/' .. hash .. '.json'
-      if vim.fn.filereadable(storage_path) == 1 then
-        table.insert(worktrees, path)
-      end
-    end
-  end
-
-  return worktrees
-end
-
--- Load buf-marks from another worktree path, without overwriting existing marks
-T.load_worktree = function(worktree_path)
-  if not worktree_path or type(worktree_path) ~= 'string' or worktree_path == '' then
-    vim.api.nvim_echo({{"Please provide a worktree path", "ErrorMsg"}}, true, {})
-    return
-  end
-
-  -- Resolve to absolute path
-  local abs_path = vim.fn.fnamemodify(worktree_path, ':p')
-  -- Remove trailing slash for consistent hashing
-  abs_path = abs_path:gsub('/$', '')
-
-  local data_dir = vim.fn.stdpath('data')
-  local storage_dir = data_dir .. '/buf_mark'
-  local hash = vim.fn.sha256(abs_path)
-  local storage_path = storage_dir .. '/' .. hash .. '.json'
-
-  local loaded = read_marks_file(storage_path)
-  if not loaded then
-    vim.api.nvim_echo({{"No buf-marks found for: " .. abs_path, "WarningMsg"}}, true, {})
-    return
-  end
-
-  -- Rebase paths from the source worktree to the current worktree
-  local cwd = vim.fn.getcwd()
-  -- Ensure trailing slash for prefix matching
-  local source_prefix = abs_path .. '/'
-
-  local count = 0
-  for char, path in pairs(loaded) do
-    if not marks[char] then
-      -- Replace the source worktree prefix with the current working directory
-      if path:sub(1, #source_prefix) == source_prefix then
-        local relative = path:sub(#source_prefix + 1)
-        marks[char] = cwd .. '/' .. relative
-      else
-        marks[char] = path
-      end
-      count = count + 1
-    end
-  end
-
-  if count > 0 then
-    save_marks()
-    trigger_marks_changed_event()
-  end
-
-  vim.api.nvim_echo({{"Loaded " .. count .. " buf-mark(s) from: " .. abs_path, "Normal"}}, true, {})
-end
-
 T.setup = function(opts)
   opts = opts or {}
 
@@ -274,7 +234,7 @@ T.setup = function(opts)
 
   -- Load existing marks for this directory if persistence is enabled
   if T.config.persist then
-    load_marks()
+    T.load_marks()  -- defaults: path=cwd, force=true, rebase=false
   end
 
   -- Fire BufMarkChanged when the user switches buffers.

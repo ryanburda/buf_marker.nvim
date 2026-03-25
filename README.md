@@ -140,15 +140,6 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > :BufMarkDeleteAll
 > ```
 >
-> #### `:BufMarkLoadWorktree <path>`
->
-> Load buf-marks from another git worktree. Marks are rebased so that file paths point to the current working directory. Existing marks in the current worktree are not overwritten.
->
-> **Example:**
-> ```
-> :BufMarkLoadWorktree ~/code/my-project/main
-> ```
-
 ### Lua API
 
 > #### `setup(opts)`
@@ -244,16 +235,24 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > require("buf-mark").delete_all()
 > ```
 >
-> #### `load_worktree(path)`
+> #### `load_marks(path, opts)`
 >
-> Load buf-marks from another git worktree into the current worktree. File paths are rebased so they point to the current working directory. Existing marks are not overwritten.
+> Load buf-marks from a given working directory.
 >
 > **Parameters:**
-> - `path` (string): Path to the source worktree
+> - `path` (string, optional): Path to the source working directory. Defaults to the current working directory.
+> - `opts` (table, optional): Options table
+>   - `force` (boolean): When `true`, overwrite existing marks. (default: `true`)
+>   - `rebase` (boolean): When `true`, rebase file paths from the source directory to the current working directory. (default: `false`)
 >
-> **Example:**
+> **Examples:**
 > ```lua
-> require("buf-mark").load_worktree("~/code/my-project/main")
+> -- Load marks for the current working directory (used internally at startup)
+> require("buf-mark").load_marks()
+>
+> -- Load marks from another project without overwriting, rebasing paths.
+> -- This can be used to load the buf-marks of another worktree of the same project into the current worktree.
+> require("buf-mark").load_marks("~/code/my-project/other_worktree", { force = false, rebase = true })
 > ```
 
 ## Events
@@ -324,7 +323,7 @@ fuzzy finder that is not installed will result in an error.
 ```lua
 -- Browse and jump to buf-marks
 require("buf-mark.fzf_lua").picker()
--- Load buf-marks from another git worktree into the current worktree
+-- Load buf-marks from another git worktree
 require("buf-mark.fzf_lua").worktree_picker()
 ```
 
@@ -333,13 +332,13 @@ require("buf-mark.fzf_lua").worktree_picker()
 ```lua
 -- Browse and jump to buf-marks
 require("buf-mark.telescope").picker()
--- Load buf-marks from another git worktree into the current worktree
+-- Load buf-marks from another git worktree
 require("buf-mark.telescope").worktree_picker()
 ```
 
 The `worktree_picker` functions list other git worktrees that have saved buf-marks. Selecting a
-worktree will load its marks into the current worktree, rebasing file paths so they point to the
-correct location. Existing marks in the current worktree are not overwritten.
+worktree will load its marks into the current project, rebasing file paths so they point to the
+current working directory. Existing marks are not overwritten.
 
 ## Do I need this plugin?
 

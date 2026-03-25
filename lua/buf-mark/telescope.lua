@@ -185,7 +185,7 @@ T.worktree_picker = function(opts)
   local entry_display = require("telescope.pickers.entry_display")
   local buf_mark = require("buf-mark")
 
-  local worktrees = buf_mark.list_worktrees()
+  local worktrees = require("buf-mark.sources").worktrees()
 
   if #worktrees == 0 then
     vim.api.nvim_echo({ { "No other worktrees with buf-marks found", "WarningMsg" } }, true, {})
@@ -226,7 +226,7 @@ T.worktree_picker = function(opts)
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         if selection then
-          buf_mark.load_worktree(selection.value)
+          buf_mark.load_marks(selection.value, { force = false, rebase = true })
         end
       end)
       return true
