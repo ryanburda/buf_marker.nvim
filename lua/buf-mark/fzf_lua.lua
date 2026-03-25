@@ -133,4 +133,36 @@ T.worktree_picker = function()
   })
 end
 
+T.project_picker = function()
+  local fzf_lua = require("fzf-lua")
+  local buf_mark = require("buf-mark")
+
+  local projects = require("buf-mark.sources").projects()
+
+  if #projects == 0 then
+    vim.api.nvim_echo({ { "No other projects with buf-marks found", "WarningMsg" } }, true, {})
+    return
+  end
+
+  local entries = {}
+  for _, path in ipairs(projects) do
+    table.insert(entries, vim.fn.fnamemodify(path, ":~"))
+  end
+
+  fzf_lua.fzf_exec(entries, {
+    prompt = "> ",
+    previewer = false,
+    winopts = {
+      title = " Load buf-marks from project ",
+      title_pos = "center",
+    },
+    actions = {
+      ["default"] = function(selected)
+        local path = vim.fn.expand(selected[1])
+        buf_mark.load_marks(path, { force = false, rebase = false })
+      end,
+    },
+  })
+end
+
 return T

@@ -234,4 +234,64 @@ T.worktree_picker = function(opts)
   }):find()
 end
 
+T.project_picker = function(opts)
+  opts = opts or {}
+
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local conf = require("telescope.config").values
+  local actions = require("telescope.actions")
+  local action_state = require("telescope.actions.state")
+  local entry_display = require("telescope.pickers.entry_display")
+  local buf_mark = require("buf-mark")
+
+  local projects = require("buf-mark.sources").projects()
+
+  if #projects == 0 then
+    vim.api.nvim_echo({ { "No other projects with buf-marks found", "WarningMsg" } }, true, {})
+    return
+  end
+
+  local displayer = entry_display.create({
+    separator = " ",
+    items = {
+      { remaining = true },
+    },
+  })
+
+  local make_display = function(entry)
+    return displayer({
+      vim.fn.fnamemodify(entry.value, ":~"),
+    })
+  end
+
+  pickers.new(opts, {
+    prompt_title = "Load buf-marks from project",
+
+    finder = finders.new_table({
+      results = projects,
+      entry_maker = function(item)
+        return {
+          value = item,
+          display = make_display,
+          ordinal = item,
+        }
+      end,
+    }),
+
+    sorter = conf.generic_sorter(opts),
+
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
+        if selection then
+          buf_mark.load_marks(selection.value, { force = false, rebase = false })
+        end
+      end)
+      return true
+    end,
+  }):find()
+end
+
 return T

@@ -132,14 +132,24 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```
 > 
 > #### `:BufMarkDeleteAll`
-> 
+>
 > Delete all buf-marks for the current project. This will clear all marks in the current working directory if buf-marks are being persisted.
-> 
+>
 > **Example:**
 > ```
 > :BufMarkDeleteAll
 > ```
 >
+> #### `:BufMarkGetStoragePath [path]`
+>
+> Print the storage file path for a working directory. Defaults to the current working directory if no path is provided.
+>
+> **Examples:**
+> ```
+> :BufMarkGetStoragePath
+> :BufMarkGetStoragePath ~/code/my-project
+> ```
+
 ### Lua API
 
 > #### `setup(opts)`
@@ -235,6 +245,22 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > require("buf-mark").delete_all()
 > ```
 >
+> #### `get_storage_path(path)`
+>
+> Get the storage file path for a given working directory.
+>
+> **Parameters:**
+> - `path` (string, optional): The working directory to get the storage path for. Defaults to the current working directory.
+>
+> **Returns:**
+> - `string`: The absolute path to the JSON storage file
+>
+> **Example:**
+> ```lua
+> local storage_path = require("buf-mark").get_storage_path()
+> -- e.g. "~/.local/share/nvim/buf_mark/abc123...def.json"
+> ```
+>
 > #### `load_marks(path, opts)`
 >
 > Load buf-marks from a given working directory.
@@ -325,6 +351,8 @@ fuzzy finder that is not installed will result in an error.
 require("buf-mark.fzf_lua").picker()
 -- Load buf-marks from another git worktree
 require("buf-mark.fzf_lua").worktree_picker()
+-- Load buf-marks from another project
+require("buf-mark.fzf_lua").project_picker()
 ```
 
 ### telescope.nvim
@@ -334,11 +362,17 @@ require("buf-mark.fzf_lua").worktree_picker()
 require("buf-mark.telescope").picker()
 -- Load buf-marks from another git worktree
 require("buf-mark.telescope").worktree_picker()
+-- Load buf-marks from another project
+require("buf-mark.telescope").project_picker()
 ```
 
 The `worktree_picker` functions list other git worktrees that have saved buf-marks. Selecting a
 worktree will load its marks into the current project, rebasing file paths so they point to the
 current working directory. Existing marks are not overwritten.
+
+The `project_picker` functions list all other projects that have saved buf-marks. Selecting a
+project will load its marks into the current session using the original file paths (no rebasing).
+Existing marks are not overwritten.
 
 ## Do I need this plugin?
 

@@ -42,6 +42,25 @@ local function save_marks()
   end
 end
 
+-- Read a buf-mark storage file, returns the parsed data table or nil
+T.read_storage_file = function(storage_path)
+  local file = io.open(storage_path, 'r')
+  if not file then
+    return nil
+  end
+
+  local content = file:read('*all')
+  file:close()
+
+  if content and content ~= '' then
+    local ok, data = pcall(vim.json.decode, content)
+    if ok and data then
+      return data
+    end
+  end
+  return nil
+end
+
 -- Trigger a custom autocommand event when marks change
 local function trigger_marks_changed_event()
   vim.api.nvim_exec_autocmds('User', {
@@ -78,27 +97,11 @@ T.load_marks = function(path, opts)
   end
 
   local storage_path = T.get_storage_path(source_dir)
-
-  -- Read marks from the storage file
-  local file = io.open(storage_path, 'r')
-  if not file then
+  local data = T.read_storage_file(storage_path)
+  if not data or not data.marks then
     return
   end
-
-  local content = file:read('*all')
-  file:close()
-
-  local loaded
-  if content and content ~= '' then
-    local ok, data = pcall(vim.json.decode, content)
-    if ok and data and data.marks then
-      loaded = data.marks
-    end
-  end
-
-  if not loaded then
-    return
-  end
+  local loaded = data.marks
 
   local cwd = vim.fn.getcwd()
   local source_prefix = source_dir .. '/'

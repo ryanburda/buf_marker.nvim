@@ -28,6 +28,13 @@ T.setup = function()
     buf_mark.delete_all()
   end, { desc = 'Delete all buffer marks for current project' })
 
+  -- Register the :BufMarkGetStoragePath command
+  vim.api.nvim_create_user_command('BufMarkGetStoragePath', function(opts)
+    local path = opts.args ~= '' and opts.args or nil
+    local storage_path = buf_mark.get_storage_path(path)
+    vim.api.nvim_echo({{storage_path, "Normal"}}, true, {})
+  end, { nargs = '?', complete = 'dir', desc = 'Print the storage file path for a working directory' })
+
 end
 
 return T
