@@ -19,7 +19,7 @@ in a way that's faster than fuzzy finding and more intentional than cycling.
 - Buf-marks are persisted per working directory
 - Supports migrating buf-marks between git worktrees
 - Integrates with fuzzy finders like Telescope and fzf-lua
-- Status module for displaying buf-marks in statusline or tabline
+- Provides a status module for displaying buf-marks in statusline or tabline
 
 ### Differences from Native Vim Marks
 
