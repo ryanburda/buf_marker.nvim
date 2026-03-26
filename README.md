@@ -5,11 +5,21 @@ A Neovim plugin that provides vim-like marks for buffers.
 ![](./docs/buf-mark.gif)
 
 Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnemonic characters to buffers.
-Mark your `init.lua` with `i`, your `main.rs` with `m`, or your `README.md` with `r`.
-In doing so you create a personal shorthand that's faster than fuzzy finding and more intentional than cycling.
-Buf-marks are persisted per working directory across sessions, allowing your shorthand to become a stable part
-of your workflow. Working across multiple git worktrees? Buf-marks can be loaded from one worktree into another,
-so your marks follow you as you switch between branches.
+
+Mark your:
+- `init.lua` with `i`
+- `main.go` with `m`
+- or your `README.md` with `r`
+
+In doing so you create a personal shorthand that becomes a stable part of your workflow
+in a way that's faster than fuzzy finding and more intentional than cycling.
+
+### Features
+
+- Buf-marks are persisted per working directory
+- Supports migrating buf-marks between git worktrees
+- Integrates with fuzzy finders like Telescope and fzf-lua
+- Status module for displaying buf-marks in statusline or tabline
 
 ### Differences from Native Vim Marks
 
@@ -34,6 +44,7 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 2. Press `<leader>mi` to mark the current buffer with character `i`
 3. Navigate to another file
 4. Press `<leader>'i` to go back to `init.lua` where you left it
+5. Close and reopen Neovim to find your marks are still there
 
 
 ## Installation
@@ -82,8 +93,8 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 
 ### Optional Dependencies
 
-- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required for the fzf-lua picker (`require("buf-mark.fzf_lua").picker()`)
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required for the telescope picker (`require("buf-mark.telescope").picker()`)
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua) - Required if using fzf-lua pickers
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Required if using telescope pickers
 - [nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) or [mini.icons](https://github.com/echasnovski/mini.icons) - Colored file type icons in the pickers. Falls back gracefully if neither is installed.
 
 
