@@ -143,6 +143,26 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > :BufMarkGoto a
 > ```
 > 
+> #### `:BufMarkNext [count]`
+>
+> Jump to the next buf-mark in sorted order. Wraps around to the first mark after the last. If the current buffer has no mark, jumps to the first mark.
+>
+> **Examples:**
+> ```
+> :BufMarkNext
+> :BufMarkNext 3
+> ```
+>
+> #### `:BufMarkPrev [count]`
+>
+> Jump to the previous buf-mark in sorted order. Wraps around to the last mark before the first. If the current buffer has no mark, jumps to the last mark.
+>
+> **Examples:**
+> ```
+> :BufMarkPrev
+> :BufMarkPrev 2
+> ```
+>
 > #### `:BufMarkDeleteAll`
 >
 > Delete all buf-marks for the current project. This will clear all marks in the current working directory if buf-marks are being persisted.
@@ -257,6 +277,32 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > require("buf-mark").goto('a')
 > ```
 > 
+> #### `next(count)`
+>
+> Jump to the next buf-mark in sorted order. Wraps around.
+>
+> **Parameters:**
+> - `count` (number, optional): Number of marks to skip forward (default: `1`)
+>
+> **Example:**
+> ```lua
+> require("buf-mark").next()
+> require("buf-mark").next(3)
+> ```
+>
+> #### `prev(count)`
+>
+> Jump to the previous buf-mark in sorted order. Wraps around.
+>
+> **Parameters:**
+> - `count` (number, optional): Number of marks to skip backward (default: `1`)
+>
+> **Example:**
+> ```lua
+> require("buf-mark").prev()
+> require("buf-mark").prev(2)
+> ```
+>
 > #### `delete_all()`
 > 
 > Delete all buf-marks for the current project.

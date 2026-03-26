@@ -23,6 +23,16 @@ T.setup = function()
     buf_mark.goto(opts.args)
   end, { nargs = 1, desc = 'Go to buffer mark for character' })
 
+  -- Register the :BufMarkNext command
+  vim.api.nvim_create_user_command('BufMarkNext', function(opts)
+    buf_mark.next(opts.count)
+  end, { count = 1, desc = 'Go to next buffer mark' })
+
+  -- Register the :BufMarkPrev command
+  vim.api.nvim_create_user_command('BufMarkPrev', function(opts)
+    buf_mark.prev(opts.count)
+  end, { count = 1, desc = 'Go to previous buffer mark' })
+
   -- Register the :BufMarkDeleteAll command
   vim.api.nvim_create_user_command('BufMarkDeleteAll', function()
     buf_mark.delete_all()

@@ -203,6 +203,61 @@ T.goto = function(char)
   end
 end
 
+-- Returns a sorted list of {char, path} entries from the marks table.
+-- Characters are sorted by their byte values (ASCII first, then multibyte/emoji).
+local function sorted_marks()
+  local result = {}
+  for char, path in pairs(marks) do
+    table.insert(result, {char = char, path = path})
+  end
+  table.sort(result, function(a, b) return a.char < b.char end)
+  return result
+end
+
+-- Goes to the next buf-mark (sorted order, wraps around)
+T.next = function(count)
+  count = count or 1
+  local mark_list = sorted_marks()
+  if #mark_list == 0 then
+    vim.api.nvim_echo({{"No buf-marks set", "WarningMsg"}}, true, {})
+    return
+  end
+
+  local current_path = vim.api.nvim_buf_get_name(0)
+  for i, mark in ipairs(mark_list) do
+    if mark.path == current_path then
+      local target = mark_list[((i - 1 + count) % #mark_list) + 1]
+      T.goto(target.char)
+      return
+    end
+  end
+
+  -- Current buffer has no mark; jump to the first mark
+  T.goto(mark_list[1].char)
+end
+
+-- Goes to the previous buf-mark (sorted order, wraps around)
+T.prev = function(count)
+  count = count or 1
+  local mark_list = sorted_marks()
+  if #mark_list == 0 then
+    vim.api.nvim_echo({{"No buf-marks set", "WarningMsg"}}, true, {})
+    return
+  end
+
+  local current_path = vim.api.nvim_buf_get_name(0)
+  for i, mark in ipairs(mark_list) do
+    if mark.path == current_path then
+      local target = mark_list[((i - 1 - count) % #mark_list) + 1]
+      T.goto(target.char)
+      return
+    end
+  end
+
+  -- Current buffer has no mark; jump to the last mark
+  T.goto(mark_list[#mark_list].char)
+end
+
 -- Returns all buffer marks as a table
 T.list = function()
   return marks
@@ -210,14 +265,7 @@ end
 
 -- Lists all buffer marks with pretty formatting
 T.list_pretty = function()
-  -- Collect all marks and sort them
-  local mark_list = {}
-  for char, path in pairs(marks) do
-    table.insert(mark_list, {char = char, path = path})
-  end
-
-  -- Sort by character
-  table.sort(mark_list, function(a, b) return a.char < b.char end)
+  local mark_list = sorted_marks()
 
   if #mark_list == 0 then
     vim.api.nvim_echo({{"No buf-marks set", "WarningMsg"}}, true, {})
