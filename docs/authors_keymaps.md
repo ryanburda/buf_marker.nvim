@@ -5,13 +5,13 @@ ergonomic as possible. This keymap configuration lets you jump to a specific buf
 
 It works by repurposing keybindings that I find less useful in practice. I rarely use local marks since most of
 the time I mark a few locations per session and want to jump to them from any buffer, making global marks the
-better fit. Similarly, Vim's special marks 1-9 (which track progressively older exit positions) require
+better fit. Similarly, Vim's automatic marks 1-9 (which track progressively older exit positions) require
 remembering what was open when you last quit Vim, which I never do. Mark 0 (last exit location) is sometimes
 helpful, though.
 
-By reassigning the local mark and special mark 1-9 keybindings to buf-marks, buffer navigation becomes a quick
+By reassigning the local mark and automatic mark 1-9 keybindings to buf-marks, buffer navigation becomes a quick
 2-keystroke operation while still preserving access to global marks and Vim's
-[special marks](https://vimhelp.org/motion.txt.html#mark-motions) (`` `'".^[]<> ``)
+[automatic marks](./using_native_marks.md#automatic-marks) (`` `'".^[]<> ``)
 
 ## Keymap Strategy
 
@@ -19,7 +19,7 @@ By reassigning the local mark and special mark 1-9 keybindings to buf-marks, buf
 - `m{uppercase}` - Set global mark (normal behavior)
 - `'{lowercase1-9}` - Goto buf-mark
 - `'{uppercase}` - Goto global mark (normal behavior)
-- `'{other}` - Goto special mark (normal behavior)
+- `'{other}` - Goto automatic mark (normal behavior)
 - `'?` - List all buf-marks
 - `'/` - Load buf-marks from another worktree
 - `';` - Load buf-marks from another project
@@ -54,7 +54,7 @@ vim.keymap.set(
 
 -- '{lowercase1-9} to goto buf-mark
 -- '{uppercase} to goto global mark
--- '{other} to goto special mark
+-- '{other} to goto automatic mark
 vim.keymap.set(
   'n',
   "'",
@@ -64,7 +64,7 @@ vim.keymap.set(
       -- goto a buf-mark
       require('buf-mark').goto(char)
     else
-      -- goto a global mark or special mark
+      -- goto a global mark or automatic mark
       local ok, err = pcall(vim.cmd, "normal! '" .. char)
       if not ok then
         local vim_err = err:match("Vim%([^)]+%):(.*)") or err
