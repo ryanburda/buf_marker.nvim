@@ -2,8 +2,6 @@
 
 A Neovim plugin that provides vim-like marks for buffers.
 
-![](./docs/buf-mark.gif)
-
 Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnemonic characters to buffers.
 
 Mark your:
@@ -11,8 +9,9 @@ Mark your:
 - `main.go` with `m`
 - or your `README.md` with `r`
 
-In doing so you create a personal shorthand that becomes a stable part of your workflow
-in a way that's faster than fuzzy finding and more intentional than cycling.
+In doing so you establish a personal shorthand that's faster than fuzzy finding and more intentional than cycling.
+
+![](./docs/buf-mark.gif)
 
 ### Features
 
