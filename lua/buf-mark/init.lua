@@ -3,10 +3,30 @@ local T = {}
 -- Dictionary mapping single characters to file paths (private)
 local marks = {}
 
+-- Dictionary mapping uppercase characters to file paths (global, cross-working-directory)
+local global_marks = {}
+
 -- Configuration options
 T.config = {
   persist = true
 }
+
+-- Returns true if char is an uppercase letter (A-Z), indicating a global mark
+local function is_global_mark(char)
+  return char:match('^%u$') ~= nil
+end
+
+-- Comparator that sorts working directory marks before global marks,
+-- alphabetically within each group.
+local function mark_comparator(a, b)
+  local a_global = is_global_mark(a)
+  local b_global = is_global_mark(b)
+  if a_global ~= b_global then
+    return b_global
+  end
+  return a < b
+end
+T.mark_comparator = mark_comparator
 
 -- Get the storage file path for a given working directory (defaults to cwd)
 T.get_storage_path = function(path)
@@ -22,7 +42,18 @@ T.get_storage_path = function(path)
   return storage_dir .. '/' .. hash .. '.json'
 end
 
--- Save marks to disk
+-- Get the storage file path for global marks
+local function get_global_storage_path()
+  local data_dir = vim.fn.stdpath('data')
+  local storage_dir = data_dir .. '/buf_mark'
+
+  -- Create directory if it doesn't exist
+  vim.fn.mkdir(storage_dir, 'p')
+
+  return storage_dir .. '/global.json'
+end
+
+-- Save working directory marks to disk
 local function save_marks()
   if not T.config.persist then
     return
@@ -36,6 +67,63 @@ local function save_marks()
 
   local json_str = vim.json.encode(data)
   local file = io.open(storage_path, 'w')
+  if file then
+    file:write(json_str)
+    file:close()
+  end
+end
+
+-- Read global marks from disk into memory
+local function read_global_marks()
+  local storage_path = get_global_storage_path()
+  local file = io.open(storage_path, 'r')
+  if not file then
+    return
+  end
+
+  local content = file:read('*all')
+  file:close()
+
+  if content and content ~= '' then
+    local ok, data = pcall(vim.json.decode, content)
+    if ok and data then
+      global_marks = data
+    end
+  end
+end
+
+-- Save global marks to disk, merging with any changes from other instances
+local function save_global_marks()
+  if not T.config.persist then
+    return
+  end
+
+  -- Snapshot in-memory state before reading disk
+  local local_marks = vim.deepcopy(global_marks)
+
+  -- Re-read from disk to pick up changes from other Neovim instances
+  local storage_path = get_global_storage_path()
+  local file = io.open(storage_path, 'r')
+  if file then
+    local content = file:read('*all')
+    file:close()
+    if content and content ~= '' then
+      local ok, disk_marks = pcall(vim.json.decode, content)
+      if ok and disk_marks then
+        -- Start from disk, overlay in-memory marks on top
+        global_marks = vim.tbl_extend('force', disk_marks, local_marks)
+        -- Remove keys that were deleted in-memory but still exist on disk
+        for char, _ in pairs(disk_marks) do
+          if local_marks[char] == nil then
+            global_marks[char] = nil
+          end
+        end
+      end
+    end
+  end
+
+  local json_str = vim.json.encode(global_marks)
+  file = io.open(storage_path, 'w')
   if file then
     file:write(json_str)
     file:close()
@@ -88,10 +176,14 @@ local function trigger_marks_changed_event()
   })
 end
 
--- Check if input is a single character
+-- Check if input is a single printable character (ASCII 33-126)
 local function input_checker(char)
   if not char or type(char) ~= 'string' or vim.fn.strcharlen(char) ~= 1 then
     vim.api.nvim_echo({{"Please provide a single character mark", "ErrorMsg"}}, true, {})
+    return false
+  end
+  local byte = string.byte(char)
+  if byte < 33 or byte > 126 then
     return false
   end
   return true
@@ -146,8 +238,16 @@ T.set = function(char)
     return
   end
 
-  marks[char] = vim.api.nvim_buf_get_name(0)
-  save_marks()
+  local filepath = vim.api.nvim_buf_get_name(0)
+
+  if is_global_mark(char) then
+    global_marks[char] = filepath
+    save_global_marks()
+  else
+    marks[char] = filepath
+    save_marks()
+  end
+
   trigger_marks_changed_event()
   vim.api.nvim_echo({{"buf-mark set: " .. char, "Normal"}}, true, {})
 end
@@ -158,23 +258,25 @@ T.delete = function(char)
     return
   end
 
-  if not marks[char] then
-    vim.api.nvim_echo({{"buf-mark not set: " .. char, "WarningMsg"}}, true, {})
-    return
+  if is_global_mark(char) then
+    read_global_marks()
+    if not global_marks[char] then
+      vim.api.nvim_echo({{"buf-mark not set: " .. char, "WarningMsg"}}, true, {})
+      return
+    end
+    global_marks[char] = nil
+    save_global_marks()
+  else
+    if not marks[char] then
+      vim.api.nvim_echo({{"buf-mark not set: " .. char, "WarningMsg"}}, true, {})
+      return
+    end
+    marks[char] = nil
+    save_marks()
   end
 
-  marks[char] = nil
-  save_marks()
   trigger_marks_changed_event()
   vim.api.nvim_echo({{"buf-mark deleted: " .. char, "Normal"}}, true, {})
-end
-
--- Deletes all marks for the current project
-T.delete_all = function()
-  marks = {}
-  save_marks()
-  trigger_marks_changed_event()
-  vim.api.nvim_echo({{"buf-mark deleted all", "Normal"}}, true, {})
 end
 
 -- Goes to the buffer associated with a character
@@ -183,7 +285,13 @@ T.goto = function(char)
     return
   end
 
-  local path = marks[char]
+  local path
+  if is_global_mark(char) then
+    read_global_marks()
+    path = global_marks[char]
+  else
+    path = marks[char]
+  end
 
   if not path then
     vim.api.nvim_echo({{"buf-mark not set: " .. char, "WarningMsg"}}, true, {})
@@ -203,14 +311,17 @@ T.goto = function(char)
   end
 end
 
--- Returns a sorted list of {char, path} entries from the marks table.
--- Characters are sorted by their byte values (ASCII first, then multibyte/emoji).
+-- Returns a sorted list of {char, path} entries from all marks (working directory and global).
 local function sorted_marks()
+  read_global_marks()
   local result = {}
   for char, path in pairs(marks) do
     table.insert(result, {char = char, path = path})
   end
-  table.sort(result, function(a, b) return a.char < b.char end)
+  for char, path in pairs(global_marks) do
+    table.insert(result, {char = char, path = path})
+  end
+  table.sort(result, function(a, b) return mark_comparator(a.char, b.char) end)
   return result
 end
 
@@ -258,12 +369,13 @@ T.prev = function(count)
   T.goto(mark_list[#mark_list].char)
 end
 
--- Returns all buffer marks as a table
+-- Returns all marks (working directory and global) as a table
 T.list = function()
-  return marks
+  read_global_marks()
+  return vim.tbl_extend('keep', marks, global_marks)
 end
 
--- Lists all buffer marks with pretty formatting
+-- Lists all marks with pretty formatting
 T.list_pretty = function()
   local mark_list = sorted_marks()
 
@@ -296,9 +408,10 @@ T.setup = function(opts)
   -- Update configuration
   T.config.persist = opts.persist or true
 
-  -- Load existing marks for this directory if persistence is enabled
+  -- Load existing marks if persistence is enabled
   if T.config.persist then
     T.load_marks()  -- defaults: path=cwd, force=true, rebase=false
+    read_global_marks()
   end
 
   -- Fire BufMarkChanged when the user switches buffers.

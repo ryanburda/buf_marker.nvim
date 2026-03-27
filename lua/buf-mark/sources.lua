@@ -3,7 +3,7 @@ Functions that discover external directories with saved buf-marks.
 
 Each function returns a list of absolute paths that can be passed
 to `require("buf-mark").load_marks(path, opts)` to load marks
-from another project or worktree into the current session.
+from another working directory or worktree into the current session.
 
 These are mainly used in the fzf-lua and telescope integrations.
 ]]
@@ -33,7 +33,7 @@ T.worktrees = function()
   return worktrees
 end
 
--- List all projects (excluding the current working directory) that have buf-mark storage files
+-- List all working directories (excluding the current one) that have buf-mark storage files
 T.projects = function()
   local buf_mark = require('buf-mark')
   local data_dir = vim.fn.stdpath('data')

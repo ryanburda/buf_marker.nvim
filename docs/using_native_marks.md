@@ -139,8 +139,8 @@ instance has exited and written to viminfo).
 set by the other instance.
 
 `buf-mark` solves this problem by persisting buf-marks across sessions on a working directory level.
-This means buf-marks made in `~/project_a` are separate from `~/project_b` which is a more intuitive 
-and predictable default when your workflow involves having a Neovim instance open per project.
+This means buf-marks made in `~/project_a` are separate from `~/project_b` which is a more intuitive
+and predictable default when your workflow involves having a Neovim instance open per working directory.
 
 `buf-mark` also:
 - ships with UI integrations like [status](../README.md#status)

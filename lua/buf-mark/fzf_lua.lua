@@ -25,7 +25,8 @@ T.picker = function()
   for char, path in pairs(marks) do
     table.insert(mark_list, { char = char, path = path })
   end
-  table.sort(mark_list, function(a, b) return a.char < b.char end)
+  local comparator = require("buf-mark").mark_comparator
+  table.sort(mark_list, function(a, b) return comparator(a.char, b.char) end)
 
   if #mark_list == 0 then
     vim.api.nvim_echo({ { "No buf-marks set", "WarningMsg" } }, true, {})
@@ -140,7 +141,7 @@ T.project_picker = function()
   local projects = require("buf-mark.sources").projects()
 
   if #projects == 0 then
-    vim.api.nvim_echo({ { "No other projects with buf-marks found", "WarningMsg" } }, true, {})
+    vim.api.nvim_echo({ { "No other working directories with buf-marks found", "WarningMsg" } }, true, {})
     return
   end
 
@@ -153,7 +154,7 @@ T.project_picker = function()
     prompt = "> ",
     previewer = false,
     winopts = {
-      title = " Load buf-marks from project ",
+      title = " Load buf-marks from working directory ",
       title_pos = "center",
     },
     actions = {

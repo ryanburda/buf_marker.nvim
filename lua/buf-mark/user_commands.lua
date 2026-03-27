@@ -33,11 +33,6 @@ T.setup = function()
     buf_mark.prev(opts.count)
   end, { count = 1, desc = 'Go to previous buffer mark' })
 
-  -- Register the :BufMarkDeleteAll command
-  vim.api.nvim_create_user_command('BufMarkDeleteAll', function()
-    buf_mark.delete_all()
-  end, { desc = 'Delete all buffer marks for current project' })
-
   -- Register the :BufMarkGetStoragePath command
   vim.api.nvim_create_user_command('BufMarkGetStoragePath', function(opts)
     local path = opts.args ~= '' and opts.args or nil

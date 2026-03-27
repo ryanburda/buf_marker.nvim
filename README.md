@@ -15,7 +15,8 @@ In doing so you establish a personal shorthand that's faster than fuzzy finding 
 
 ### Features
 
-- Buf-marks are persisted per working directory
+- **Working directory marks** (lowercase, digits, symbols) are persisted per working directory
+- **Global marks** (uppercase `A`-`Z`) are accessible from any working directory
 - Supports migrating buf-marks between git worktrees
 - Integrates with fuzzy finders like Telescope and fzf-lua
 - Provides a status module for displaying buf-marks in statusline or tabline
@@ -25,7 +26,7 @@ In doing so you establish a personal shorthand that's faster than fuzzy finding 
 | Feature | native marks | buf-marks |
 |---------|------------------|----------|
 | **Navigation** | Jump to fixed line/column | Jump to buffer + restore last cursor position |
-| **Persistence** | Saved globally in shada file, shared across all sessions | Persisted per working directory |
+| **Persistence** | Saved globally in shada file, shared across all sessions | Working directory marks persisted per working directory; global marks accessible from any working directory |
 | **Use Case** | Bookmarking locations within files | Quick buffer switching |
 
 ## Usage
@@ -40,10 +41,16 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 ### Example Workflow
 
 1. Open a file (e.g., `init.lua`)
-2. Press `<leader>mi` to mark the current buffer with character `i`
+2. Press `<leader>mi` to mark the current buffer with character `i` (working directory mark)
 3. Navigate to another file
 4. Press `<leader>'i` to go back to `init.lua` where you left it
 5. Close and reopen Neovim to find your marks are still there
+
+Global marks work the same way but use uppercase letters and are accessible from any working directory:
+
+1. Press `<leader>mN` to set a global mark `N` for the current buffer
+2. Switch to a different working directory
+3. Press `<leader>'N` to jump back to the globally marked buffer
 
 
 ## Installation
@@ -74,7 +81,7 @@ require("buf-mark").setup({
   keymaps = true,
   -- Set to true to persist marks between Neovim sessions.
   -- Marks will be saved per working directory
-  -- (e.g., marks in ~/project-a are separate from ~/project-b)
+  -- (e.g., marks in ~/code/project-a are separate from ~/code/project-b)
   persist = true,
   -- Customize the optional status highlight groups. (See Status section of README for more details)
   -- By default, the status module uses `StatusLine` for the current buffer's mark
@@ -87,8 +94,7 @@ require("buf-mark").setup({
 })
 ```
 
-For an alternative keymap configuration that repurposes native local mark keybindings for
-buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
+For an alternative keymap layout for buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 
 ### Optional Dependencies
 
@@ -102,11 +108,11 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 ### User Commands
 
 > #### `:BufMarkList`
-> 
-> Lists all buf-marks with their associated files. The output displays:
+>
+> Lists all buf-marks (working directory and global) with their associated files. The output displays:
 > - Mark character
 > - File path (relative to current directory)
-> 
+>
 > Example output:
 > ```
 > mark  file
@@ -114,23 +120,26 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 >  b    README.md
 >  c    path/to/file.txt
 > ```
-> 
+>
 > #### `:BufMarkSet <char>`
-> 
+>
 > Set a buf-mark for the current buffer using the specified character.
-> 
-> **Example:**
+> Uppercase letters (`A`-`Z`) create global marks; all other characters create working directory marks.
+>
+> **Examples:**
 > ```
 > :BufMarkSet a
+> :BufMarkSet A
 > ```
-> 
+>
 > #### `:BufMarkDelete <char>`
-> 
+>
 > Delete the buf-mark for the specified character.
-> 
-> **Example:**
+>
+> **Examples:**
 > ```
 > :BufMarkDelete a
+> :BufMarkDelete A
 > ```
 > 
 > #### `:BufMarkGoto <char>`
@@ -160,15 +169,6 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```
 > :BufMarkPrev
 > :BufMarkPrev 2
-> ```
->
-> #### `:BufMarkDeleteAll`
->
-> Delete all buf-marks for the current project. This will clear all marks in the current working directory if buf-marks are being persisted.
->
-> **Example:**
-> ```
-> :BufMarkDeleteAll
 > ```
 >
 > #### `:BufMarkGetStoragePath [path]`
@@ -217,12 +217,12 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```
 > 
 > #### `list()`
-> 
-> Returns all buf-marks as a table mapping characters to file paths.
-> 
+>
+> Returns all buf-marks (working directory and global) as a table mapping characters to file paths.
+>
 > **Returns:**
 > - `table`: A table where keys are mark characters and values are file paths
-> 
+>
 > **Example:**
 > ```lua
 > local marks = require("buf-mark").list()
@@ -230,50 +230,55 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 >   print("Mark " .. char .. " -> " .. path)
 > end
 > ```
-> 
+>
 > #### `list_pretty()`
-> 
-> Display all buf-marks with their associated buffer information in a formatted view.
-> 
+>
+> Display all buf-marks (working directory and global) with their associated buffer information in a formatted view.
+>
 > **Example:**
 > ```lua
 > require("buf-mark").list_pretty()
 > ```
-> 
+>
 > #### `set(char)`
-> 
-> Set a buf-mark for the current buffer.
-> 
+>
+> Set a buf-mark for the current buffer. Uppercase letters (`A`-`Z`) set global marks;
+> all other characters set working directory marks.
+>
 > **Parameters:**
 > - `char` (string): A single character to use as the mark identifier
-> 
-> **Example:**
+>
+> **Examples:**
 > ```lua
-> require("buf-mark").set('a')
+> require("buf-mark").set('a')  -- working directory mark
+> require("buf-mark").set('A')  -- global mark
 > ```
 > 
 > #### `delete(char)`
-> 
-> Delete a buf-mark.
-> 
+>
+> Delete a buf-mark. Uppercase letters delete global marks; all other characters delete working directory marks.
+>
 > **Parameters:**
 > - `char` (string): The mark character to delete
-> 
-> **Example:**
+>
+> **Examples:**
 > ```lua
-> require("buf-mark").delete('a')
+> require("buf-mark").delete('a')  -- working directory mark
+> require("buf-mark").delete('A')  -- global mark
 > ```
-> 
+>
 > #### `goto(char)`
-> 
-> Jump to the buffer associated with the given mark.
-> 
+>
+> Jump to the buffer associated with the given mark. Uppercase letters jump to global marks;
+> all other characters jump to working directory marks.
+>
 > **Parameters:**
 > - `char` (string): The mark character to jump to
-> 
-> **Example:**
+>
+> **Examples:**
 > ```lua
-> require("buf-mark").goto('a')
+> require("buf-mark").goto('a')  -- working directory mark
+> require("buf-mark").goto('A')  -- global mark
 > ```
 > 
 > #### `next(count)`
@@ -300,15 +305,6 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > ```lua
 > require("buf-mark").prev()
 > require("buf-mark").prev(2)
-> ```
->
-> #### `delete_all()`
-> 
-> Delete all buf-marks for the current project.
-> 
-> **Example:**
-> ```lua
-> require("buf-mark").delete_all()
 > ```
 >
 > #### `get_storage_path(path)`
@@ -354,11 +350,11 @@ buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
 > -- Load marks for the current working directory (used internally at startup)
 > require("buf-mark").load_marks()
 >
-> -- Load marks from another project without overwriting, rebasing paths.
-> -- This can be used to load the buf-marks of another worktree of the same project into the current worktree.
+> -- Load marks from another working directory without overwriting, rebasing paths.
+> -- This can be used to load the buf-marks of another worktree into the current worktree.
 > require("buf-mark").load_marks("~/code/my-project/other_worktree", { force = false, rebase = true })
 > ```
-
+>
 ## Events
 
 A `BufMarkChanged` event is fired whenever:
@@ -388,7 +384,7 @@ Marks are shown in alphabetical order with the mark of the current buffer highli
 
 **Why only show marks for open buffers?**
 
-Over time, you'll accumulate marks for many buffers across a given project. Displaying all marks would create
+Over time, you'll accumulate marks for many buffers across a given working directory. Displaying all marks would create
 visual clutter and make it harder to find the information you need. By showing only marks for currently open
 buffers, the status display provides focus and context for the specific problem you're working on right now.
 If you need to see all marks, you can list them separately using `:BufMarkList` or by using one of
@@ -414,43 +410,52 @@ require('lualine').setup({
 
 ## Fuzzy Finder Integrations
 
-Buf-marks contains pickers for [fzf-lua](https://github.com/ibhagwan/fzf-lua) and
-[telescope.nvim](https://github.com/nvim-telescope/telescope.nvim). Both pickers show a
-file preview at the current cursor position and support `ctrl-x` to delete the selected mark.
+Buf-marks works with the following:
+- [fzf-lua](https://github.com/ibhagwan/fzf-lua)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
-No additional setup is required for either picker. If you have Fzf-lua or Telescope installed,
-you can call the corresponding `picker` function directly. Calling the `picker` function for a
-fuzzy finder that is not installed will result in an error.
+No additional setup is required to call any of the picker functions. Calling a function for a fuzzy finder
+that is not installed will result in an error. Each fuzzy finder integration exposes the following functions:
+
+#### `picker()`
+
+Browse all buf-marks and jump to the selected one. The preview shows the file at the last known
+cursor position. Press `ctrl-x` to delete the selected mark.
+
+**NOTE:** Buf-marks are meant to be a shorthand you can recall from memory. That's what makes them fast.
+But sometimes you need a nudge to remember what you mapped where, and that's where fuzzy finding
+comes in. It's there if you need it, but try not to rely on it too much. If you're reaching for
+this picker every time, consider whether your marks could be more memorable.
+
+#### `worktree_picker()`
+
+Lists other git worktrees that have saved buf-marks. Selecting a worktree loads its marks into
+your current session. File paths are rebased so they point to the equivalent files in the current
+working directory. This is useful when you create a new worktree and want to bring over marks you
+already set up in another one. Existing marks are not overwritten.
+
+#### `project_picker()`
+
+Lists all other working directories that have saved buf-marks. Selecting a working directory loads
+its marks into your current session using the original, absolute file paths (no rebasing). This
+lets you quickly pull in marks from a different project so you can jump to those files without
+switching directories. Existing marks are not overwritten.
 
 ### fzf-lua
 
 ```lua
--- Browse and jump to buf-marks
 require("buf-mark.fzf_lua").picker()
--- Load buf-marks from another git worktree
 require("buf-mark.fzf_lua").worktree_picker()
--- Load buf-marks from another project
 require("buf-mark.fzf_lua").project_picker()
 ```
 
 ### telescope.nvim
 
 ```lua
--- Browse and jump to buf-marks
 require("buf-mark.telescope").picker()
--- Load buf-marks from another git worktree
 require("buf-mark.telescope").worktree_picker()
--- Load buf-marks from another project
 require("buf-mark.telescope").project_picker()
 ```
-
-The `worktree_picker` functions list other git worktrees that have saved buf-marks. Selecting a
-worktree will load its marks into the current project, rebasing file paths so they point to the
-current working directory. Existing marks are not overwritten.
-
-The `project_picker` functions list all other projects that have saved buf-marks. Selecting a
-project will load its marks into the current session using the original file paths (no rebasing).
-Existing marks are not overwritten.
 
 ## Do I need this plugin?
 

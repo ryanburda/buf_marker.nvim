@@ -17,13 +17,14 @@ local config = {
 local function update()
   local s = ''
 
-  -- Get buf-marks
-  local marks = require('buf-mark').list() or {}
+  -- Get all buf-marks (working directory and global)
+  local buf_mark = require('buf-mark')
   local sorted_marks = {}
-  for mark_char, mark_path in pairs(marks) do
+  for mark_char, mark_path in pairs(buf_mark.list() or {}) do
     table.insert(sorted_marks, {char = mark_char, path = mark_path})
   end
-  table.sort(sorted_marks, function(a, b) return a.char < b.char end)
+  local comparator = buf_mark.mark_comparator
+  table.sort(sorted_marks, function(a, b) return comparator(a.char, b.char) end)
 
   -- Get buffers
   local buffers = {}
