@@ -18,7 +18,7 @@ end
 
 -- Comparator that sorts working directory marks before global marks,
 -- alphabetically within each group.
-local function mark_comparator(a, b)
+T.mark_comparator = function(a, b)
   local a_global = is_global_mark(a)
   local b_global = is_global_mark(b)
   if a_global ~= b_global then
@@ -26,7 +26,6 @@ local function mark_comparator(a, b)
   end
   return a < b
 end
-T.mark_comparator = mark_comparator
 
 -- Get the storage file path for a given working directory (defaults to cwd)
 T.get_storage_path = function(path)
@@ -321,7 +320,7 @@ local function sorted_marks()
   for char, path in pairs(global_marks) do
     table.insert(result, {char = char, path = path})
   end
-  table.sort(result, function(a, b) return mark_comparator(a.char, b.char) end)
+  table.sort(result, function(a, b) return T.mark_comparator(a.char, b.char) end)
   return result
 end
 
