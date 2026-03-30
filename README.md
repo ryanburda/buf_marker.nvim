@@ -393,6 +393,32 @@ If you need to see all marks, you can list them separately using `:BufMarkList` 
 the [fuzzy finder integrations](#fuzzy-finder-integrations)
 
 
+#### `next(count)`
+
+Jump to the next buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
+
+**Parameters:**
+- `count` (number, optional): Number of marks to skip forward (default: `1`)
+
+**Example:**
+```lua
+require("buf-mark.status").next()
+require("buf-mark.status").next(2)
+```
+
+#### `prev(count)`
+
+Jump to the previous buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
+
+**Parameters:**
+- `count` (number, optional): Number of marks to skip backward (default: `1`)
+
+**Example:**
+```lua
+require("buf-mark.status").prev()
+require("buf-mark.status").prev(2)
+```
+
 #### Usage with statusline
 
 ```lua
