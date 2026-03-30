@@ -24,7 +24,7 @@ character against a reserved set and feed it back so the dedicated keymap fires:
 
 ```lua
 local buf_mark = require('buf-mark')
-local reserved = { ['?'] = true, ['['] = true, [']'] = true }
+local reserved = { [';'] = true, ['['] = true, [']'] = true, ['?'] = true, ['/'] = true, ["'"] = true  }
 
 vim.keymap.set('n', "<leader>'", function()
   local char = vim.fn.getcharstr()
@@ -36,12 +36,22 @@ vim.keymap.set('n', "<leader>'", function()
 end, { desc = 'Goto buf-mark' })
 
 -- Now these fire independently of the <leader>' mapping
-vim.keymap.set('n', "<leader>'?", buf_mark.list_pretty, { desc = 'List buf-marks' })
+vim.keymap.set('n', "<leader>';", ':b#<cr>', { desc = 'Alternate buffer' })
 vim.keymap.set('n', "<leader>'[", buf_mark.prev, { desc = 'Previous buf-mark' })
 vim.keymap.set('n', "<leader>']", buf_mark.next, { desc = 'Next buf-mark' })
+
+vim.keymap.set('n', "<leader>'?", require('buf-mark.fzf_lua').list, { desc = 'Fuzzy find buf-marks' })
+-- vim.keymap.set('n', "<leader>'?", require('buf-mark.telescope').list, { desc = 'Fuzzy find buf-marks' })
+-- vim.keymap.set('n', "<leader>'?", buf_mark.list_pretty, { desc = 'List buf-marks' })
+
+vim.keymap.set('n', "<leader>'/", require('buf-mark.fzf_lua').worktrees, { desc = 'Fuzzy find worktrees' })
+-- vim.keymap.set('n', "<leader>'/", require('buf-mark.telescope').worktrees, { desc = 'Fuzzy find worktrees' })
+
+vim.keymap.set('n', "<leader>''", require('buf-mark.fzf_lua').projects, { desc = 'Fuzzy find projects' })
+-- vim.keymap.set('n', "<leader>''", require('buf-mark.telescope').projects, { desc = 'Fuzzy find projects' })
 ```
 
-## Using `s` as the Prefix
+## Using `s` as the Prefix (Author's preference)
 
 Repurposing `s` and `S` gives you two-keystroke buf-mark access. `s{char}` jumps and `S{char}` sets.
 
@@ -51,10 +61,23 @@ Repurposing `s` and `S` gives you two-keystroke buf-mark access. `s{char}` jumps
 [leap.nvim](https://github.com/ggandor/leap.nvim), note that these plugins also remap `s`/`S`.
 
 ```lua
-local reserved = { ['?'] = true, ['/'] = true, [';'] = true, ["'"] = true, ['['] = true, [']'] = true }
+---------------
+-- Buf-marks --
+---------------
+-- `S{char}` - Set buf-mark
+-- `s{char}` - Goto buf-mark
+-- `s?` - List all buf-marks
+-- `s[` - Previous buf-mark
+-- `s]` - Next buf-mark
+-- `s/` - Load buf-marks from another worktree
+-- `s'` - Load buf-marks from another project
+-- `s;` - Jump to alternate buffer
+
+local buf_mark = require('buf-mark')
+local reserved = { [';'] = true, ['['] = true, [']'] = true, ['?'] = true, ['/'] = true, ["'"] = true }
 
 vim.keymap.set('n', 'S', function()
-  require('buf-mark').set(vim.fn.getcharstr())
+  buf_mark.set(vim.fn.getcharstr())
 end, { desc = 'Set buf-mark' })
 
 vim.keymap.set('n', 's', function()
@@ -63,13 +86,22 @@ vim.keymap.set('n', 's', function()
     vim.api.nvim_feedkeys('s' .. char, 'm', false)
     return
   end
-  require('buf-mark').goto(char)
+  buf_mark.goto(char)
 end, { desc = 'Goto buf-mark' })
 
-vim.keymap.set('n', 's?', require('buf-mark').list_pretty, { desc = 'List buf-marks' })
-vim.keymap.set('n', 's[', require('buf-mark').prev, { desc = 'Previous buf-mark' })
-vim.keymap.set('n', 's]', require('buf-mark').next, { desc = 'Next buf-mark' })
 vim.keymap.set('n', 's;', ':b#<cr>', { desc = 'Alternate buffer' })
+vim.keymap.set('n', 's[', buf_mark.prev, { desc = 'Previous buf-mark' })
+vim.keymap.set('n', 's]', buf_mark.next, { desc = 'Next buf-mark' })
+
+vim.keymap.set('n', 's?', require('buf-mark.fzf_lua').list, { desc = 'Fuzzy find buf-marks' })
+-- vim.keymap.set('n', 's?', require('buf-mark.telescope').list, { desc = 'Fuzzy find buf-marks' })
+-- vim.keymap.set('n', 's?', buf_mark.list_pretty, { desc = 'List buf-marks' })
+
+vim.keymap.set('n', 's/', require('buf-mark.fzf_lua').worktrees, { desc = 'Fuzzy find worktrees' })
+-- vim.keymap.set('n', 's/', require('buf-mark.telescope').worktrees, { desc = 'Fuzzy find worktrees' })
+
+vim.keymap.set('n', "s'", require('buf-mark.fzf_lua').projects, { desc = 'Fuzzy find projects' })
+-- vim.keymap.set('n', "s'", require('buf-mark.telescope').projects, { desc = 'Fuzzy find projects' })
 ```
 
 ## Swapping Native Marks and Buf-marks

@@ -21,6 +21,15 @@ In doing so you establish a personal shorthand that's faster than fuzzy finding 
 - Integrates with fuzzy finders like Telescope and fzf-lua
 - Provides a status module for displaying buf-marks in statusline or tabline
 
+### Parallels with Native Vim Marks
+
+Buf-marks borrow the local/global distinction from native Vim marks:
+
+- In Vim, **lowercase marks** (`a`-`z`) are local to a single file. In buf-marks, **working directory marks** (lowercase, digits, symbols) are local to the current working directory.
+- In Vim, **uppercase marks** (`A`-`Z`) are global and can jump you across files. In buf-marks, **global marks** (`A`-`Z`) are accessible from any working directory.
+
+The mental model is the same: lowercase for nearby things, uppercase for things you need to reach from anywhere.
+
 ### Differences from Native Vim Marks
 
 | Feature | native marks | buf-marks |
