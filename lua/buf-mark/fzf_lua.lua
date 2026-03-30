@@ -13,7 +13,7 @@ local function get_file_icon(filename)
   return nil, nil
 end
 
-T.picker = function()
+T.list = function()
   local fzf_lua = require("fzf-lua")
   local fzf_utils = require("fzf-lua.utils")
   local buf_mark = require("buf-mark")
@@ -95,14 +95,14 @@ T.picker = function()
         local char = selected[1]:match("^[^:]*:[^:]*:[^:]*:(%S+)")
         if char then
           buf_mark.delete(char)
-          T.picker()
+          T.list()
         end
       end,
     },
   })
 end
 
-T.worktree_picker = function()
+T.worktrees = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 
@@ -134,7 +134,7 @@ T.worktree_picker = function()
   })
 end
 
-T.project_picker = function()
+T.projects = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 

@@ -1,7 +1,7 @@
 # Keymap Suggestions
 
 The default keymaps use `<leader>m{char}` to set and `<leader>'{char}` to jump. These work fine,
-but buf-marks are one of the most frequent actions in a Neovim workflow, so it's worth
+but switching buffers is one of the most frequent actions in a Neovim workflow, so it's worth
 experimenting to find what feels best for you. The following sections are meant as inspiration
 for personalizing your keymaps, not as prescriptive setups.
 

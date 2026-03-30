@@ -46,13 +46,6 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 4. Press `<leader>'i` to go back to `init.lua` where you left it
 5. Close and reopen Neovim to find your marks are still there
 
-Global marks work the same way but use uppercase letters and are accessible from any working directory:
-
-1. Press `<leader>mN` to set a global mark `N` for the current buffer
-2. Switch to a different working directory
-3. Press `<leader>'N` to jump back to the globally marked buffer
-
-
 ## Installation
 
 ### [vim.pack](https://neovim.io/doc/user/pack.html) (Neovim 0.12+)
@@ -417,7 +410,7 @@ Buf-marks works with the following:
 No additional setup is required to call any of the picker functions. Calling a function for a fuzzy finder
 that is not installed will result in an error. Each fuzzy finder integration exposes the following functions:
 
-#### `picker()`
+#### `list()`
 
 Browse all buf-marks and jump to the selected one. The preview shows the file at the last known
 cursor position. Press `ctrl-x` to delete the selected mark.
@@ -427,14 +420,14 @@ But sometimes you need a nudge to remember what you mapped where, and that's whe
 comes in. It's there if you need it, but try not to rely on it too much. If you're reaching for
 this picker every time, consider whether your marks could be more memorable.
 
-#### `worktree_picker()`
+#### `worktrees()`
 
 Lists other git worktrees that have saved buf-marks. Selecting a worktree loads its marks into
 your current session. File paths are rebased so they point to the equivalent files in the current
 working directory. This is useful when you create a new worktree and want to bring over marks you
 already set up in another one. Existing marks are not overwritten.
 
-#### `project_picker()`
+#### `projects()`
 
 Lists all other working directories that have saved buf-marks. Selecting a working directory loads
 its marks into your current session using the original, absolute file paths (no rebasing). This
@@ -444,17 +437,17 @@ switching directories. Existing marks are not overwritten.
 ### fzf-lua
 
 ```lua
-require("buf-mark.fzf_lua").picker()
-require("buf-mark.fzf_lua").worktree_picker()
-require("buf-mark.fzf_lua").project_picker()
+require("buf-mark.fzf_lua").list()
+require("buf-mark.fzf_lua").worktrees()
+require("buf-mark.fzf_lua").projects()
 ```
 
 ### telescope.nvim
 
 ```lua
-require("buf-mark.telescope").picker()
-require("buf-mark.telescope").worktree_picker()
-require("buf-mark.telescope").project_picker()
+require("buf-mark.telescope").list()
+require("buf-mark.telescope").worktrees()
+require("buf-mark.telescope").projects()
 ```
 
 ## Do I need this plugin?

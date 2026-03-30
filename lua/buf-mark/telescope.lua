@@ -13,7 +13,7 @@ local function get_file_icon(filename)
   return nil, nil
 end
 
-T.picker = function(opts)
+T.list = function(opts)
   opts = opts or {}
 
   local pickers = require("telescope.pickers")
@@ -165,7 +165,7 @@ T.picker = function(opts)
           buf_mark.delete(selection.value.char)
           actions.close(prompt_bufnr)
           vim.schedule(function()
-            T.picker(opts)
+            T.list(opts)
           end)
         end
       end)
@@ -175,7 +175,7 @@ T.picker = function(opts)
   }):find()
 end
 
-T.worktree_picker = function(opts)
+T.worktrees = function(opts)
   opts = opts or {}
 
   local pickers = require("telescope.pickers")
@@ -235,7 +235,7 @@ T.worktree_picker = function(opts)
   }):find()
 end
 
-T.project_picker = function(opts)
+T.projects = function(opts)
   opts = opts or {}
 
   local pickers = require("telescope.pickers")
