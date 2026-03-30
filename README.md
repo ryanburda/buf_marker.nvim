@@ -94,7 +94,7 @@ require("buf-mark").setup({
 })
 ```
 
-For an alternative keymap layout for buf-marks, see [Author's Keymap Preferences](docs/authors_keymaps.md).
+For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.md).
 
 ### Optional Dependencies
 
