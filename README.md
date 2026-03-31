@@ -15,27 +15,35 @@ In doing so you establish a personal shorthand that's faster than fuzzy finding 
 
 ### Features
 
-- **Working directory marks** (lowercase, digits, symbols) are persisted per working directory
-- **Global marks** (uppercase `A`-`Z`) are accessible from any working directory
-- Supports migrating buf-marks between git worktrees
-- Integrates with fuzzy finders like Telescope and fzf-lua
+- Jumping to a buf-mark restores your cursor to where you left off
+- Marks persist across sessions, allowing them to become a stable part of your workflow
+- **Working Directory** buf-marks can be set on a per-project basis
+- **Global** buf-marks can be set and accessed from any working directory
 - Provides a status module for displaying buf-marks in statusline or tabline
+- Integrates with fuzzy finders like Telescope and fzf-lua
+- Supports migrating buf-marks between git worktrees
 
 ### Parallels with Native Vim Marks
 
 Buf-marks borrow the local/global distinction from native Vim marks:
 
-- In Vim, **lowercase marks** (`a`-`z`) are local to a single file. In buf-marks, **working directory marks** (lowercase, digits, symbols) are local to the current working directory.
-- In Vim, **uppercase marks** (`A`-`Z`) are global and can jump you across files. In buf-marks, **global marks** (`A`-`Z`) are accessible from any working directory.
+| Scope | native marks | buf-marks |
+|-------|--------------|-----------|
+| **Local** | Lowercase marks (`a`-`z`) are local to a single file | Working directory marks (`a`-`z`, `0`-`9`, and symbols) are local to the current working directory |
+| **Global** | Uppercase marks (`A`-`Z`) are global and can jump across files | Global marks (`A`-`Z`) are accessible from any working directory |
 
 The mental model is the same: lowercase for nearby things, uppercase for things you need to reach from anywhere.
+
+Because working directory marks are scoped per project, you can reuse the same characters across different codebases.
+For example, `m` can point to `main.go` in one project and `models.py` in another.
+Each project gets its own independent set of marks.
 
 ### Differences from Native Vim Marks
 
 | Feature | native marks | buf-marks |
 |---------|------------------|----------|
 | **Navigation** | Jump to fixed line/column | Jump to buffer + restore last cursor position |
-| **Persistence** | Saved globally in shada file, shared across all sessions | Working directory marks persisted per working directory; global marks accessible from any working directory |
+| **Persistence** | Saved globally in shada file, shared across all sessions | Working directory marks and global marks are persisted as JSON |
 | **Use Case** | Bookmarking locations within files | Quick buffer switching |
 
 ## Usage
@@ -50,7 +58,7 @@ The default keymaps mirror native marks but are prefixed with `<leader>`:
 ### Example Workflow
 
 1. Open a file (e.g., `init.lua`)
-2. Press `<leader>mi` to mark the current buffer with character `i` (working directory mark)
+2. Press `<leader>mi` to mark the current buffer with character `i`
 3. Navigate to another file
 4. Press `<leader>'i` to go back to `init.lua` where you left it
 5. Close and reopen Neovim to find your marks are still there
@@ -105,7 +113,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 - [nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons) or [mini.icons](https://github.com/echasnovski/mini.icons) - Colored file type icons in the pickers. Falls back gracefully if neither is installed.
 
 
-## Usage
+## API
 
 ### User Commands
 
@@ -353,8 +361,11 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > require("buf-mark").load_marks()
 >
 > -- Load marks from another working directory without overwriting, rebasing paths.
-> -- This can be used to load the buf-marks of another worktree into the current worktree.
+> -- This can be used to load the buf-marks of another git worktree into the current worktree.
 > require("buf-mark").load_marks("~/code/my-project/other_worktree", { force = false, rebase = true })
+>
+> -- Or load marks from a completely different project to easily jump to files in another working directory.
+> require("buf-mark").load_marks("~/code/my-other-project", { force = true, rebase = false })
 > ```
 >
 ## Events
@@ -365,7 +376,7 @@ A `BufMarkChanged` event is fired whenever:
 
 You can respond to this event by creating an autocommand like so:
 ```lua
-vim.api.nvim_create_autocmd("User", { pattern = "BufMarkChanged", ... }))
+vim.api.nvim_create_autocmd("User", { pattern = "BufMarkChanged", ... })
 ```
 
 **Use cases:**
@@ -380,60 +391,68 @@ The `buf-mark.status` module provides a function to display buf-marks **for curr
 This is useful for integrating buf-mark information into statuslines, tablines, or other UI components.
 Marks are shown in alphabetical order with the mark of the current buffer highlighted.
 
+This serves as a compact alternative to a traditional tabline. Instead of showing
+full filenames for every open buffer, you see only the single-character marks you
+chose, giving you the same at-a-glance context in a fraction of the space.
+
 ![](./docs/status1.jpg)
 
 ![](./docs/status2.jpg)
 
-**Why only show marks for open buffers?**
+**Why only show buf-marks for open buffers?**
 
-Over time, you'll accumulate marks for many buffers across a given working directory. Displaying all marks would create
-visual clutter and make it harder to find the information you need. By showing only marks for currently open
-buffers, the status display provides focus and context for the specific problem you're working on right now.
-If you need to see all marks, you can list them separately using `:BufMarkList` or by using one of
-the [fuzzy finder integrations](#fuzzy-finder-integrations)
+Over time you'll accumulate marks. Displaying all marks would create visual clutter and
+make it harder to find the information you're actually interested in. By showing only
+marks for currently open buffers, the status display provides focus and context for the
+specific problem you're currently working on. If you need to see all marks, you can list
+them separately using `:BufMarkList` or by using one of the [fuzzy finder integrations](#fuzzy-finder-integrations).
 
+### Setup
 
-#### `next(count)`
+> #### Usage with statusline
+>
+> **NOTE:** also shows current file (`%f`) name and modified flag (`%m`).
+> 
+> ```lua
+> vim.o.statusline = '%{%v:lua.require("buf-mark.status").get()%} %f %m'
+> ```
+> 
+> #### Usage with lualine
+> 
+> ```lua
+> require('lualine').setup({
+>   sections = {
+>     lualine_a = {require('buf-mark.status').get},
+>   }
+> })
+> ```
 
-Jump to the next buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
-
-**Parameters:**
-- `count` (number, optional): Number of marks to skip forward (default: `1`)
-
-**Example:**
-```lua
-require("buf-mark.status").next()
-require("buf-mark.status").next(2)
-```
-
-#### `prev(count)`
-
-Jump to the previous buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
-
-**Parameters:**
-- `count` (number, optional): Number of marks to skip backward (default: `1`)
-
-**Example:**
-```lua
-require("buf-mark.status").prev()
-require("buf-mark.status").prev(2)
-```
-
-#### Usage with statusline
-
-```lua
-vim.o.statusline = '%{%v:lua.require("buf-mark.status").get()%} %f %m'
-```
-
-#### Usage with lualine
-
-```lua
-require('lualine').setup({
-  sections = {
-    lualine_a = {require('buf-mark.status').get},
-  }
-})
-```
+### Functions
+> #### `next(count)`
+> 
+> Jump to the next buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
+> 
+> **Parameters:**
+> - `count` (number, optional): Number of marks to skip forward (default: `1`)
+> 
+> **Example:**
+> ```lua
+> require("buf-mark.status").next()
+> require("buf-mark.status").next(2)
+> ```
+> 
+> #### `prev(count)`
+> 
+> Jump to the previous buf-mark in sorted order, considering only marks for currently open buffers. Wraps around.
+> 
+> **Parameters:**
+> - `count` (number, optional): Number of marks to skip backward (default: `1`)
+> 
+> **Example:**
+> ```lua
+> require("buf-mark.status").prev()
+> require("buf-mark.status").prev(2)
+> ```
 
 
 ## Fuzzy Finder Integrations

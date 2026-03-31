@@ -24,7 +24,7 @@ character against a reserved set and feed it back so the dedicated keymap fires:
 
 ```lua
 local buf_mark = require('buf-mark')
-local reserved = { [';'] = true, ['['] = true, [']'] = true, ['?'] = true, ['/'] = true, ["'"] = true  }
+local reserved = { [';'] = true, ['['] = true, [']'] = true, ['?'] = true, ['/'] = true, ["'"] = true }
 
 vim.keymap.set('n', "<leader>'", function()
   local char = vim.fn.getcharstr()
