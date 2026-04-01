@@ -1,6 +1,6 @@
 # buf-mark
 
-A Neovim plugin that provides vim-like marks for buffers.
+A Neovim plugin that provides vim-like marks for buffer switching.
 
 Buf-marks turn buffer switching into muscle memory by assigning meaningful, mnemonic characters to buffers.
 
