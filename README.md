@@ -11,7 +11,7 @@ Mark your:
 
 In doing so you establish a personal shorthand that's faster than fuzzy finding and more intentional than cycling.
 
-![](./docs/buf-mark.gif)
+![](./docs/gifs/demo.gif)
 
 ### Features
 
@@ -395,9 +395,7 @@ This serves as a compact alternative to a traditional tabline. Instead of showin
 full filenames for every open buffer, you see only the single-character marks you
 chose, giving you the same at-a-glance context in a fraction of the space.
 
-![](./docs/status1.jpg)
-
-![](./docs/status2.jpg)
+![](./docs/gifs/status.gif)
 
 **Why only show buf-marks for open buffers?**
 
@@ -460,6 +458,8 @@ them separately using `:BufMarkList` or by using one of the [fuzzy finder integr
 Buf-marks works with the following:
 - [fzf-lua](https://github.com/ibhagwan/fzf-lua)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
+
+![](./docs/gifs/fuzzy_finder.gif)
 
 No additional setup is required to call any of the picker functions. Calling a function for a fuzzy finder
 that is not installed will result in an error. Each fuzzy finder integration exposes the following functions:
