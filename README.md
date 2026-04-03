@@ -17,7 +17,7 @@ In doing so you establish a personal shorthand that's faster than fuzzy finding 
 
 - Jumping to a buf-mark restores your cursor to where you left off
 - Marks persist across sessions, allowing them to become a stable part of your workflow
-- **Working Directory** buf-marks can be set on a per-project basis
+- **Local** buf-marks are scoped to the current working directory
 - **Global** buf-marks can be set and accessed from any working directory
 - Provides a status module for displaying buf-marks in statusline or tabline
 - Integrates with fuzzy finders like Telescope and fzf-lua
@@ -29,12 +29,12 @@ Buf-marks borrow the local/global distinction from native Vim marks:
 
 | Scope | native marks | buf-marks |
 |-------|--------------|-----------|
-| **Local** | Lowercase marks (`a`-`z`) are local to a single file | Working directory marks (`a`-`z`, `0`-`9`, and symbols) are local to the current working directory |
+| **Local** | Lowercase marks (`a`-`z`) are local to a single file | Local marks (`a`-`z`, `0`-`9`, and symbols) are local to the current working directory |
 | **Global** | Uppercase marks (`A`-`Z`) are global and can jump across files | Global marks (`A`-`Z`) are accessible from any working directory |
 
 The mental model is the same: lowercase for nearby things, uppercase for things you need to reach from anywhere.
 
-Because working directory marks are scoped per project, you can reuse the same characters across different codebases.
+Because local marks are scoped per working directory, you can reuse the same characters across different codebases.
 For example, `m` can point to `main.go` in one project and `models.py` in another.
 Each project gets its own independent set of marks.
 
@@ -43,7 +43,7 @@ Each project gets its own independent set of marks.
 | Feature | native marks | buf-marks |
 |---------|------------------|----------|
 | **Navigation** | Jump to fixed line/column | Jump to buffer + restore last cursor position |
-| **Persistence** | Saved globally in shada file, shared across all sessions | Working directory marks and global marks are persisted as JSON |
+| **Persistence** | Saved globally in shada file, shared across all sessions | Local marks and global marks are persisted as JSON |
 | **Use Case** | Bookmarking locations within files | Quick buffer switching |
 
 ## Usage
@@ -119,7 +119,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 
 > #### `:BufMarkList`
 >
-> Lists all buf-marks (working directory and global) with their associated files. The output displays:
+> Lists all buf-marks (local and global) with their associated files. The output displays:
 > - Mark character
 > - File path (relative to current directory)
 >
@@ -134,7 +134,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > #### `:BufMarkSet <char>`
 >
 > Set a buf-mark for the current buffer using the specified character.
-> Uppercase letters (`A`-`Z`) create global marks; all other characters create working directory marks.
+> Uppercase letters (`A`-`Z`) create global marks; all other characters create local marks.
 >
 > **Examples:**
 > ```
@@ -228,7 +228,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > 
 > #### `list()`
 >
-> Returns all buf-marks (working directory and global) as a table mapping characters to file paths.
+> Returns all buf-marks (local and global) as a table mapping characters to file paths.
 >
 > **Returns:**
 > - `table`: A table where keys are mark characters and values are file paths
@@ -243,7 +243,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 >
 > #### `list_pretty()`
 >
-> Display all buf-marks (working directory and global) with their associated buffer information in a formatted view.
+> Display all buf-marks (local and global) with their associated buffer information in a formatted view.
 >
 > **Example:**
 > ```lua
@@ -253,41 +253,41 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > #### `set(char)`
 >
 > Set a buf-mark for the current buffer. Uppercase letters (`A`-`Z`) set global marks;
-> all other characters set working directory marks.
+> all other characters set local marks.
 >
 > **Parameters:**
 > - `char` (string): A single character to use as the mark identifier
 >
 > **Examples:**
 > ```lua
-> require("buf-mark").set('a')  -- working directory mark
+> require("buf-mark").set('a')  -- local mark
 > require("buf-mark").set('A')  -- global mark
 > ```
 > 
 > #### `delete(char)`
 >
-> Delete a buf-mark. Uppercase letters delete global marks; all other characters delete working directory marks.
+> Delete a buf-mark. Uppercase letters delete global marks; all other characters delete local marks.
 >
 > **Parameters:**
 > - `char` (string): The mark character to delete
 >
 > **Examples:**
 > ```lua
-> require("buf-mark").delete('a')  -- working directory mark
+> require("buf-mark").delete('a')  -- local mark
 > require("buf-mark").delete('A')  -- global mark
 > ```
 >
 > #### `goto(char)`
 >
 > Jump to the buffer associated with the given mark. Uppercase letters jump to global marks;
-> all other characters jump to working directory marks.
+> all other characters jump to local marks.
 >
 > **Parameters:**
 > - `char` (string): The mark character to jump to
 >
 > **Examples:**
 > ```lua
-> require("buf-mark").goto('a')  -- working directory mark
+> require("buf-mark").goto('a')  -- local mark
 > require("buf-mark").goto('A')  -- global mark
 > ```
 > 
