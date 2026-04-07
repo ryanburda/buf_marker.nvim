@@ -317,7 +317,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > require("buf-mark").prev(2)
 > ```
 >
-> #### `get_storage_path(path)`
+> #### `get_storage_file_path(path)`
 >
 > Get the storage file path for a given working directory.
 >
@@ -329,7 +329,7 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 >
 > **Example:**
 > ```lua
-> local storage_path = require("buf-mark").get_storage_path()
+> local storage_path = require("buf-mark").get_storage_file_path()
 > -- e.g. "~/.local/share/nvim/buf_mark/abc123...def.json"
 > ```
 >
@@ -366,6 +366,24 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 >
 > -- Or load marks from a completely different project to easily jump to files in another working directory.
 > require("buf-mark").load_marks("~/code/my-other-project", { force = true, rebase = false })
+> ```
+>
+> #### `unload_marks(path, opts)`
+>
+> Unload buf-marks of another working directory from the current session. Only removes a mark if its file path still matches what the source directory's storage file contains, so marks that were overwritten after loading are left untouched.
+>
+> **Parameters:**
+> - `path` (string): Path to the source working directory whose marks should be unloaded.
+> - `opts` (table, optional): Options table
+>   - `rebase` (boolean): When `true`, compare against rebased file paths (use this if the marks were originally loaded with `rebase = true`). (default: `false`)
+>
+> **Examples:**
+> ```lua
+> -- Unload marks that were previously loaded from another worktree (with rebasing)
+> require("buf-mark").unload_marks("~/code/my-project/other_worktree", { rebase = true })
+>
+> -- Unload marks that were previously loaded from another project (without rebasing)
+> require("buf-mark").unload_marks("~/code/my-other-project")
 > ```
 >
 ## Events
@@ -474,34 +492,50 @@ But sometimes you need a nudge to remember what you mapped where, and that's whe
 comes in. It's there if you need it, but try not to rely on it too much. If you're reaching for
 this picker every time, consider whether your marks could be more memorable.
 
-#### `worktrees()`
+#### `load_worktree()`
 
 Lists other git worktrees that have saved buf-marks. Selecting a worktree loads its marks into
 your current session. File paths are rebased so they point to the equivalent files in the current
 working directory. This is useful when you create a new worktree and want to bring over marks you
 already set up in another one. Existing marks are not overwritten.
 
-#### `projects()`
+#### `load_project()`
 
 Lists all other working directories that have saved buf-marks. Selecting a working directory loads
 its marks into your current session using the original, absolute file paths (no rebasing). This
 lets you quickly pull in marks from a different project so you can jump to those files without
 switching directories. Existing marks are not overwritten.
 
+#### `unload_worktree()`
+
+Lists other git worktrees that have saved buf-marks. Selecting a worktree unloads its marks from
+your current session. Only marks whose file paths still match what was originally loaded (with
+rebasing) are removed, so marks you've since overwritten are left untouched.
+
+#### `unload_project()`
+
+Lists all other working directories that have saved buf-marks. Selecting a working directory
+unloads its marks from your current session. Only marks whose file paths still match what was
+originally loaded are removed, so marks you've since overwritten are left untouched.
+
 ### fzf-lua
 
 ```lua
 require("buf-mark.fzf_lua").list()
-require("buf-mark.fzf_lua").worktrees()
-require("buf-mark.fzf_lua").projects()
+require("buf-mark.fzf_lua").load_worktree()
+require("buf-mark.fzf_lua").load_project()
+require("buf-mark.fzf_lua").unload_worktree()
+require("buf-mark.fzf_lua").unload_project()
 ```
 
 ### telescope.nvim
 
 ```lua
 require("buf-mark.telescope").list()
-require("buf-mark.telescope").worktrees()
-require("buf-mark.telescope").projects()
+require("buf-mark.telescope").load_worktree()
+require("buf-mark.telescope").load_project()
+require("buf-mark.telescope").unload_worktree()
+require("buf-mark.telescope").unload_project()
 ```
 
 ## Do I need this plugin?

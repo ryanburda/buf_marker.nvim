@@ -28,7 +28,7 @@ T.mark_comparator = function(a, b)
 end
 
 -- Get the storage file path for a given working directory (defaults to cwd)
-T.get_storage_path = function(path)
+T.get_storage_file_path = function(path)
   local data_dir = vim.fn.stdpath('data')
   local storage_dir = data_dir .. '/buf_mark'
 
@@ -58,7 +58,7 @@ local function save_marks()
     return
   end
 
-  local storage_path = T.get_storage_path()
+  local storage_path = T.get_storage_file_path()
   local data = {
     cwd = vim.fn.getcwd(),
     marks = marks
@@ -156,7 +156,7 @@ T.remove_storage_file = function(path)
   end
 
   local abs_path = vim.fn.fnamemodify(path, ':p'):gsub('/$', '')
-  local storage_path = T.get_storage_path(abs_path)
+  local storage_path = T.get_storage_file_path(abs_path)
 
   if vim.fn.filereadable(storage_path) == 0 then
     vim.api.nvim_echo({{"No storage file found for: " .. abs_path, "WarningMsg"}}, true, {})
@@ -206,7 +206,7 @@ T.load_marks = function(path, opts)
     source_dir = vim.fn.getcwd()
   end
 
-  local storage_path = T.get_storage_path(source_dir)
+  local storage_path = T.get_storage_file_path(source_dir)
   local data = T.read_storage_file(storage_path)
   if not data or not data.marks then
     return
@@ -224,6 +224,50 @@ T.load_marks = function(path, opts)
       else
         marks[char] = file_path
       end
+    end
+  end
+
+  save_marks()
+  trigger_marks_changed_event()
+end
+
+-- Unload marks of another working directory from the current session.
+-- Only removes a mark if its file path still matches what the source
+-- directory's storage file contains (possibly rebased), so marks that
+-- were overwritten after loading are left untouched.
+T.unload_marks = function(path, opts)
+  opts = opts or {}
+  local rebase = opts.rebase == true   -- default false
+
+  if not path then
+    vim.api.nvim_echo({{"Please provide a working directory path", "ErrorMsg"}}, true, {})
+    return
+  end
+
+  local source_dir = vim.fn.fnamemodify(path, ':p'):gsub('/$', '')
+
+  local storage_path = T.get_storage_file_path(source_dir)
+  local data = T.read_storage_file(storage_path)
+  if not data or not data.marks then
+    return
+  end
+
+  local cwd = vim.fn.getcwd()
+  local source_prefix = source_dir .. '/'
+
+  for char, file_path in pairs(data.marks) do
+    -- Determine the path that would have been written into marks when loaded
+    local expected_path
+    if rebase and file_path:sub(1, #source_prefix) == source_prefix then
+      local relative = file_path:sub(#source_prefix + 1)
+      expected_path = cwd .. '/' .. relative
+    else
+      expected_path = file_path
+    end
+
+    -- Only remove the mark if its current value matches the expected path
+    if marks[char] == expected_path then
+      marks[char] = nil
     end
   end
 

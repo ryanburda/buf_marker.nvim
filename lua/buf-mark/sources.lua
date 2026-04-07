@@ -23,7 +23,7 @@ T.worktrees = function()
   for _, line in ipairs(result) do
     local path = line:match('^worktree (.+)$')
     if path and path ~= cwd then
-      local storage_path = buf_mark.get_storage_path(path)
+      local storage_path = buf_mark.get_storage_file_path(path)
       if vim.fn.filereadable(storage_path) == 1 then
         table.insert(worktrees, path)
       end

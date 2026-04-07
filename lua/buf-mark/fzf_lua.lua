@@ -102,7 +102,7 @@ T.list = function()
   })
 end
 
-T.worktrees = function()
+T.load_worktree = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 
@@ -134,7 +134,7 @@ T.worktrees = function()
   })
 end
 
-T.projects = function()
+T.load_project = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
 
@@ -161,6 +161,70 @@ T.projects = function()
       ["default"] = function(selected)
         local path = vim.fn.expand(selected[1])
         buf_mark.load_marks(path, { force = false, rebase = false })
+      end,
+    },
+  })
+end
+
+T.unload_worktree = function()
+  local fzf_lua = require("fzf-lua")
+  local buf_mark = require("buf-mark")
+
+  local worktrees = require("buf-mark.sources").worktrees()
+
+  if #worktrees == 0 then
+    vim.api.nvim_echo({ { "No other worktrees with buf-marks found", "WarningMsg" } }, true, {})
+    return
+  end
+
+  local entries = {}
+  for _, path in ipairs(worktrees) do
+    table.insert(entries, vim.fn.fnamemodify(path, ":~"))
+  end
+
+  fzf_lua.fzf_exec(entries, {
+    prompt = "> ",
+    previewer = false,
+    winopts = {
+      title = " Unload buf-marks from worktree ",
+      title_pos = "center",
+    },
+    actions = {
+      ["default"] = function(selected)
+        local path = vim.fn.expand(selected[1])
+        buf_mark.unload_marks(path, { rebase = true })
+      end,
+    },
+  })
+end
+
+T.unload_project = function()
+  local fzf_lua = require("fzf-lua")
+  local buf_mark = require("buf-mark")
+
+  local projects = require("buf-mark.sources").projects()
+
+  if #projects == 0 then
+    vim.api.nvim_echo({ { "No other working directories with buf-marks found", "WarningMsg" } }, true, {})
+    return
+  end
+
+  local entries = {}
+  for _, path in ipairs(projects) do
+    table.insert(entries, vim.fn.fnamemodify(path, ":~"))
+  end
+
+  fzf_lua.fzf_exec(entries, {
+    prompt = "> ",
+    previewer = false,
+    winopts = {
+      title = " Unload buf-marks from working directory ",
+      title_pos = "center",
+    },
+    actions = {
+      ["default"] = function(selected)
+        local path = vim.fn.expand(selected[1])
+        buf_mark.unload_marks(path, { rebase = false })
       end,
     },
   })

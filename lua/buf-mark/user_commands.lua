@@ -36,7 +36,7 @@ T.setup = function()
   -- Register the :BufMarkGetStoragePath command
   vim.api.nvim_create_user_command('BufMarkGetStoragePath', function(opts)
     local path = opts.args ~= '' and opts.args or nil
-    local storage_path = buf_mark.get_storage_path(path)
+    local storage_path = buf_mark.get_storage_file_path(path)
     vim.api.nvim_echo({{storage_path, "Normal"}}, true, {})
   end, { nargs = '?', complete = 'dir', desc = 'Print the storage file path for a working directory' })
 
