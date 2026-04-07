@@ -4,9 +4,10 @@ T.setup = function()
   local buf_mark = require('buf-mark')
 
   -- Register the :BufMarkList command
-  vim.api.nvim_create_user_command('BufMarkList', function()
-    buf_mark.list_pretty()
-  end, { desc = 'List all buffer marks' })
+  vim.api.nvim_create_user_command('BufMarkList', function(opts)
+    local path = opts.args ~= '' and opts.args or nil
+    buf_mark.list_pretty(path)
+  end, { nargs = '?', complete = 'dir', desc = 'List all buffer marks (optionally for a given working directory)' })
 
   -- Register the :BufMarkSet command
   vim.api.nvim_create_user_command('BufMarkSet', function(opts)

@@ -102,6 +102,30 @@ T.list = function()
   })
 end
 
+local function marks_previewer()
+  local builtin = require("fzf-lua.previewer.builtin")
+  local MarksPreviewer = builtin.base:extend()
+
+  function MarksPreviewer:new(o, opts, fzf_win)
+    MarksPreviewer.super.new(self, o, opts, fzf_win)
+    setmetatable(self, MarksPreviewer)
+    return self
+  end
+
+  function MarksPreviewer:populate_preview_buf(entry_str)
+    local buf = self:get_tmp_buffer()
+    local path = vim.fn.expand(entry_str)
+    local lines = require("buf-mark").format_marks(path)
+    if #lines == 0 then
+      lines = { "No marks found" }
+    end
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+    self:set_preview_buf(buf)
+  end
+
+  return MarksPreviewer
+end
+
 T.load_worktree = function()
   local fzf_lua = require("fzf-lua")
   local buf_mark = require("buf-mark")
@@ -120,7 +144,7 @@ T.load_worktree = function()
 
   fzf_lua.fzf_exec(entries, {
     prompt = "> ",
-    previewer = false,
+    previewer = marks_previewer(),
     winopts = {
       title = " Load buf-marks from worktree ",
       title_pos = "center",
@@ -152,7 +176,7 @@ T.load_project = function()
 
   fzf_lua.fzf_exec(entries, {
     prompt = "> ",
-    previewer = false,
+    previewer = marks_previewer(),
     winopts = {
       title = " Load buf-marks from working directory ",
       title_pos = "center",
@@ -184,7 +208,7 @@ T.unload_worktree = function()
 
   fzf_lua.fzf_exec(entries, {
     prompt = "> ",
-    previewer = false,
+    previewer = marks_previewer(),
     winopts = {
       title = " Unload buf-marks from worktree ",
       title_pos = "center",
@@ -216,7 +240,7 @@ T.unload_project = function()
 
   fzf_lua.fzf_exec(entries, {
     prompt = "> ",
-    previewer = false,
+    previewer = marks_previewer(),
     winopts = {
       title = " Unload buf-marks from working directory ",
       title_pos = "center",

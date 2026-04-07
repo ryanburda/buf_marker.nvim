@@ -418,26 +418,47 @@ T.list = function()
   return vim.tbl_extend('keep', marks, global_marks)
 end
 
--- Lists all marks with pretty formatting
-T.list_pretty = function()
-  local mark_list = sorted_marks()
+-- Returns formatted mark lines for a given path (or current marks if nil).
+-- Returns a list of strings suitable for display in a buffer or preview.
+T.format_marks = function(path)
+  local mark_list
+  if path then
+    local abs_path = vim.fn.fnamemodify(path, ':p'):gsub('/$', '')
+    local storage_path = T.get_storage_file_path(abs_path)
+    local data = T.read_storage_file(storage_path)
+    if not data or not data.marks then
+      return {}
+    end
+    mark_list = {}
+    for char, file_path in pairs(data.marks) do
+      table.insert(mark_list, {char = char, path = file_path})
+    end
+    table.sort(mark_list, function(a, b) return T.mark_comparator(a.char, b.char) end)
+  else
+    mark_list = sorted_marks()
+  end
 
   if #mark_list == 0 then
+    return {}
+  end
+
+  local lines = {}
+  for _, mark in ipairs(mark_list) do
+    local display_path = vim.fn.fnamemodify(mark.path, ':~:.')
+    table.insert(lines, string.format(" %s    %s", mark.char, display_path))
+  end
+  return lines
+end
+
+-- Lists all marks with pretty formatting
+T.list_pretty = function(path)
+  local lines = T.format_marks(path)
+
+  if #lines == 0 then
     vim.api.nvim_echo({{"No buf-marks set", "WarningMsg"}}, true, {})
     return
   end
 
-  -- Build output lines
-  local lines = {}
-  for _, mark in ipairs(mark_list) do
-    -- Get relative path or full path
-    local display_path = vim.fn.fnamemodify(mark.path, ':~:.')
-
-    local line = string.format(" %s    %s", mark.char, display_path)
-    table.insert(lines, line)
-  end
-
-  -- Display in a message
   local output = {
     {"mark  file", "Title"},
     {"\n" .. table.concat(lines, "\n"), "Normal"}

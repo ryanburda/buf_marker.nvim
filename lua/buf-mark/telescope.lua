@@ -183,6 +183,7 @@ T.load_worktree = function(opts)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
+  local previewers = require("telescope.previewers")
   local entry_display = require("telescope.pickers.entry_display")
   local buf_mark = require("buf-mark")
 
@@ -222,6 +223,17 @@ T.load_worktree = function(opts)
 
     sorter = conf.generic_sorter(opts),
 
+    previewer = previewers.new_buffer_previewer({
+      title = "Buf-Marks",
+      define_preview = function(self, entry)
+        local lines = buf_mark.format_marks(entry.value)
+        if #lines == 0 then
+          lines = { "No marks found" }
+        end
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+      end,
+    }),
+
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
@@ -243,6 +255,7 @@ T.load_project = function(opts)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
+  local previewers = require("telescope.previewers")
   local entry_display = require("telescope.pickers.entry_display")
   local buf_mark = require("buf-mark")
 
@@ -282,6 +295,17 @@ T.load_project = function(opts)
 
     sorter = conf.generic_sorter(opts),
 
+    previewer = previewers.new_buffer_previewer({
+      title = "Buf-Marks",
+      define_preview = function(self, entry)
+        local lines = buf_mark.format_marks(entry.value)
+        if #lines == 0 then
+          lines = { "No marks found" }
+        end
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+      end,
+    }),
+
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
@@ -303,6 +327,7 @@ T.unload_worktree = function(opts)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
+  local previewers = require("telescope.previewers")
   local entry_display = require("telescope.pickers.entry_display")
   local buf_mark = require("buf-mark")
 
@@ -342,6 +367,17 @@ T.unload_worktree = function(opts)
 
     sorter = conf.generic_sorter(opts),
 
+    previewer = previewers.new_buffer_previewer({
+      title = "Buf-Marks",
+      define_preview = function(self, entry)
+        local lines = buf_mark.format_marks(entry.value)
+        if #lines == 0 then
+          lines = { "No marks found" }
+        end
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+      end,
+    }),
+
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
         actions.close(prompt_bufnr)
@@ -363,6 +399,7 @@ T.unload_project = function(opts)
   local conf = require("telescope.config").values
   local actions = require("telescope.actions")
   local action_state = require("telescope.actions.state")
+  local previewers = require("telescope.previewers")
   local entry_display = require("telescope.pickers.entry_display")
   local buf_mark = require("buf-mark")
 
@@ -401,6 +438,17 @@ T.unload_project = function(opts)
     }),
 
     sorter = conf.generic_sorter(opts),
+
+    previewer = previewers.new_buffer_previewer({
+      title = "Buf-Marks",
+      define_preview = function(self, entry)
+        local lines = buf_mark.format_marks(entry.value)
+        if #lines == 0 then
+          lines = { "No marks found" }
+        end
+        vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
+      end,
+    }),
 
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
