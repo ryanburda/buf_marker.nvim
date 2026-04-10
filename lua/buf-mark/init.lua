@@ -277,6 +277,9 @@ end
 
 -- Set a mark for a character to a filepath
 T.set = function(char)
+  if not char then
+    char = vim.fn.getcharstr()
+  end
   if not input_checker(char) then
     return
   end
@@ -297,6 +300,9 @@ end
 
 -- Deletes a mark for a character to a filepath
 T.delete = function(char)
+  if not char then
+    char = vim.fn.getcharstr()
+  end
   if not input_checker(char) then
     return
   end
@@ -324,6 +330,9 @@ end
 
 -- Goes to the buffer associated with a character
 T.goto = function(char)
+  if not char then
+    char = vim.fn.getcharstr()
+  end
   if not input_checker(char) then
     return
   end

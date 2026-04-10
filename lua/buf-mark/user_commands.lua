@@ -11,18 +11,21 @@ T.setup = function()
 
   -- Register the :BufMarkSet command
   vim.api.nvim_create_user_command('BufMarkSet', function(opts)
-    buf_mark.set(opts.args)
-  end, { nargs = 1, desc = 'Set buffer mark for character' })
+    local char = opts.args ~= '' and opts.args or nil
+    buf_mark.set(char)
+  end, { nargs = '?', desc = 'Set buffer mark for character' })
 
   -- Register the :BufMarkDelete command
   vim.api.nvim_create_user_command('BufMarkDelete', function(opts)
-    buf_mark.delete(opts.args)
-  end, { nargs = 1, desc = 'Delete buffer mark for character' })
+    local char = opts.args ~= '' and opts.args or nil
+    buf_mark.delete(char)
+  end, { nargs = '?', desc = 'Delete buffer mark for character' })
 
   -- Register the :BufMarkGoto command
   vim.api.nvim_create_user_command('BufMarkGoto', function(opts)
-    buf_mark.goto(opts.args)
-  end, { nargs = 1, desc = 'Go to buffer mark for character' })
+    local char = opts.args ~= '' and opts.args or nil
+    buf_mark.goto(char)
+  end, { nargs = '?', desc = 'Go to buffer mark for character' })
 
   -- Register the :BufMarkNext command
   vim.api.nvim_create_user_command('BufMarkNext', function(opts)

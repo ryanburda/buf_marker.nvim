@@ -131,33 +131,39 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 >  c    path/to/file.txt
 > ```
 >
-> #### `:BufMarkSet <char>`
+> #### `:BufMarkSet [char]`
 >
 > Set a buf-mark for the current buffer using the specified character.
 > Uppercase letters (`A`-`Z`) create global marks; all other characters create local marks.
+> When called without an argument, waits for the next keypress.
 >
 > **Examples:**
 > ```
+> :BufMarkSet
 > :BufMarkSet a
 > :BufMarkSet A
 > ```
 >
-> #### `:BufMarkDelete <char>`
+> #### `:BufMarkDelete [char]`
 >
 > Delete the buf-mark for the specified character.
+> When called without an argument, waits for the next keypress.
 >
 > **Examples:**
 > ```
+> :BufMarkDelete
 > :BufMarkDelete a
 > :BufMarkDelete A
 > ```
 > 
-> #### `:BufMarkGoto <char>`
-> 
+> #### `:BufMarkGoto [char]`
+>
 > Jump to the buffer associated with the specified mark character.
-> 
-> **Example:**
+> When called without an argument, waits for the next keypress.
+>
+> **Examples:**
 > ```
+> :BufMarkGoto
 > :BufMarkGoto a
 > ```
 > 
@@ -253,13 +259,15 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > #### `set(char)`
 >
 > Set a buf-mark for the current buffer. Uppercase letters (`A`-`Z`) set global marks;
-> all other characters set local marks.
+> all other characters set local marks. When called without an argument, waits for the
+> next keypress.
 >
 > **Parameters:**
-> - `char` (string): A single character to use as the mark identifier
+> - `char` (string, optional): A single character to use as the mark identifier. If omitted, prompts for a character.
 >
 > **Examples:**
 > ```lua
+> require("buf-mark").set()     -- waits for keypress
 > require("buf-mark").set('a')  -- local mark
 > require("buf-mark").set('A')  -- global mark
 > ```
@@ -267,12 +275,14 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > #### `delete(char)`
 >
 > Delete a buf-mark. Uppercase letters delete global marks; all other characters delete local marks.
+> When called without an argument, waits for the next keypress.
 >
 > **Parameters:**
-> - `char` (string): The mark character to delete
+> - `char` (string, optional): The mark character to delete. If omitted, prompts for a character.
 >
 > **Examples:**
 > ```lua
+> require("buf-mark").delete()     -- waits for keypress
 > require("buf-mark").delete('a')  -- local mark
 > require("buf-mark").delete('A')  -- global mark
 > ```
@@ -280,13 +290,15 @@ For alternative keymap ideas, see [Keymap Suggestions](docs/keymap_suggestions.m
 > #### `goto(char)`
 >
 > Jump to the buffer associated with the given mark. Uppercase letters jump to global marks;
-> all other characters jump to local marks.
+> all other characters jump to local marks. When called without an argument, waits for the
+> next keypress.
 >
 > **Parameters:**
-> - `char` (string): The mark character to jump to
+> - `char` (string, optional): The mark character to jump to. If omitted, prompts for a character.
 >
 > **Examples:**
 > ```lua
+> require("buf-mark").goto()     -- waits for keypress
 > require("buf-mark").goto('a')  -- local mark
 > require("buf-mark").goto('A')  -- global mark
 > ```
